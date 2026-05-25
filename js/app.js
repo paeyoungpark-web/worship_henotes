@@ -88,10 +88,13 @@ async function loadSong(idx) {
   UI.renderTracks(currentSong.tracks, mixer);
   UI.showLoading(false);
 
-  // 시크바 초기화
+  // 곡 구간 설정 (start/end)
+  mixer.setSongSegment(currentSong.start || 0, currentSong.end || null);
+
+  // 시크바 초기화 (전체 duration이 아닌 songDuration 기준)
   const seekBar = document.getElementById('seek-bar');
   seekBar.value = 0;
-  seekBar.max   = Math.floor(mixer.duration * 1000);
+  seekBar.max   = Math.floor(mixer.songDuration * 1000);
 
   // 루프 버튼 초기화
   document.getElementById('loop-a-btn').textContent = '🔁 A 지점';
@@ -148,7 +151,7 @@ function bindGlobalEvents() {
   // ── 시크바 ──
   document.getElementById('seek-bar').addEventListener('input', e => {
     const pct  = +e.target.value / (+e.target.max);
-    const time = pct * mixer.duration;
+    const time = pct * mixer.songDuration;
     mixer.seek(time);
     updateTimeDisplay();
     if (mixer.isPlaying) startSeekUpdate();
@@ -252,11 +255,11 @@ function startSeekUpdate() {
     const cur = mixer.getCurrentTime();
     const max = +document.getElementById('seek-bar').max;
     document.getElementById('seek-bar').value =
-      mixer.duration > 0 ? (cur / mixer.duration) * max : 0;
+      mixer.songDuration > 0 ? (cur / mixer.songDuration) * max : 0;
     updateTimeDisplay();
 
     // 곡 끝
-    if (cur >= mixer.duration - 0.1) {
+    if (!mixer.isPlaying || cur >= mixer.songDuration - 0.1) {
       mixer.stop();
       clearInterval(seekInterval);
       document.getElementById('seek-bar').value = 0;
@@ -268,7 +271,7 @@ function startSeekUpdate() {
 function updateTimeDisplay() {
   if (!mixer) return;
   const cur = mixer.getCurrentTime();
-  const dur = mixer.duration;
+  const dur = mixer.songDuration;
   document.getElementById('time-display').textContent =
     `${UI.formatTime(cur)} / ${UI.formatTime(dur)}`;
 }

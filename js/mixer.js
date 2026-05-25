@@ -14,6 +14,19 @@ class WorshipMixer {
     this.reverbBuffer = null;
     this.reverbLoaded = false;
     this.loop = { enabled: false, a: null, b: null };
+    this.songStart = 0;
+    this.songEnd   = null;
+  }
+
+  // 곡 구간 (전체 파일 중 일부만 재생)
+  setSongSegment(start, end) {
+    this.songStart = start || 0;
+    this.songEnd   = end   || null;  // null = 끝까지
+  }
+
+  get songDuration() {
+    if (this.songEnd !== null) return this.songEnd - this.songStart;
+    return Math.max(0, this.duration - this.songStart);
   }
 
   async init() {
@@ -95,6 +108,8 @@ class WorshipMixer {
     this.tracks = [];
     this.duration = 0;
     this.pauseTime = 0;
+    this.songStart = 0;
+    this.songEnd   = null;
     this.loop = { enabled: false, a: null, b: null };
   }
 
@@ -102,14 +117,17 @@ class WorshipMixer {
     if (this.isPlaying) return;
     if (this.ctx.state === 'suspended') this.ctx.resume();
 
-    const startOffset = Math.max(0, Math.min(offset, this.duration));
-    this.startTime = this.ctx.currentTime - startOffset;
+    // offset은 곡 내 상대시간, 실제 버퍼 위치는 songStart + offset
+    const clampedOffset = Math.max(0, Math.min(offset, this.songDuration));
+    const bufferOffset  = this.songStart + clampedOffset;
+
+    this.startTime = this.ctx.currentTime - clampedOffset;
 
     this.tracks.forEach(t => {
       const src = this.ctx.createBufferSource();
       src.buffer = t.buffer;
       src.connect(t.gain);
-      src.start(0, startOffset);
+      src.start(0, bufferOffset);
       t.source = src;
     });
 
@@ -142,14 +160,14 @@ class WorshipMixer {
     const wasPlaying = this.isPlaying;
     if (wasPlaying) this._stopAllSources();
     this.isPlaying = false;
-    this.pauseTime = Math.max(0, Math.min(time, this.duration));
+    this.pauseTime = Math.max(0, Math.min(time, this.songDuration));
     if (wasPlaying) this.play(this.pauseTime);
   }
 
   getCurrentTime() {
     if (!this.ctx) return 0;
     if (this.isPlaying) {
-      return Math.min(this.ctx.currentTime - this.startTime, this.duration);
+      return Math.min(this.ctx.currentTime - this.startTime, this.songDuration);
     }
     return this.pauseTime;
   }
@@ -220,10 +238,17 @@ class WorshipMixer {
    * 구간 루프 체크 — 메인 루프(setInterval)에서 주기적으로 호출
    */
   checkLoop() {
+    const cur = this.getCurrentTime();
+    // 구간 끝 자동 정지
+    if (this.songEnd !== null && cur >= this.songDuration - 0.1) {
+      this.stop();
+      this.pauseTime = 0;
+      return;
+    }
+    // A-B 루프
     if (!this.loop.enabled) return;
     if (this.loop.a == null || this.loop.b == null) return;
     if (this.loop.b <= this.loop.a) return;
-    const cur = this.getCurrentTime();
     if (cur >= this.loop.b) {
       this.seek(this.loop.a);
     }

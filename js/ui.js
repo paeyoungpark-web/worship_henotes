@@ -47,7 +47,7 @@ const UI = {
           card.className = 'song-card';
           card.innerHTML = `
             <div class="title">${song.title}</div>
-            <div class="meta">${song.duration || '—'} · 트랙 ${song.tracks.length}개</div>
+            <div class="meta">${(song.start != null && song.end != null) ? UI.formatTime(song.end - song.start) : (song.duration || '—')} · 트랙 ${song.tracks.length}개</div>
           `;
           card.addEventListener('click', () => onClick(song._idx));
           list.appendChild(card);
