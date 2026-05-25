@@ -1,19 +1,25 @@
 [
   {
     "id": "song01",
-    "title": "주 보좌 앞에 나아갈 때",
-    "date": "2026-05-19",
-    "duration": "5:23",
+    "title": "주일 예배 찬양 (2026-05-25)",
+    "date": "2026-05-25",
+    "duration": "",
     "tracks": [
-      { "name": "리드보컬",   "file": "audio/song01/vocal_lead.mp3",  "group": "vocal"  },
-      { "name": "화음 1",     "file": "audio/song01/vocal_harm1.mp3", "group": "vocal"  },
-      { "name": "화음 2",     "file": "audio/song01/vocal_harm2.mp3", "group": "vocal"  },
-      { "name": "드럼",       "file": "audio/song01/drums.mp3",       "group": "drums"  },
-      { "name": "베이스",     "file": "audio/song01/bass.mp3",        "group": "bass"   },
-      { "name": "일렉기타",   "file": "audio/song01/eg.mp3",          "group": "guitar" },
-      { "name": "어쿠스틱",   "file": "audio/song01/ag.mp3",          "group": "guitar" },
-      { "name": "건반",       "file": "audio/song01/keys.mp3",        "group": "keys"   },
-      { "name": "신디",       "file": "audio/song01/synth.mp3",       "group": "keys"   }
+      { "name": "박재우목사님",  "file": "audio/song01/박재우목사님_bip.mp3", "group": "vocal" },
+      { "name": "목사 (1)",      "file": "audio/song01/목사_bip.mp3",          "group": "vocal" },
+      { "name": "목사 (2)",      "file": "audio/song01/목사2_bip.mp3",         "group": "vocal" },
+      { "name": "박배영",        "file": "audio/song01/박배영_bip.mp3",        "group": "vocal" },
+      { "name": "박희은",        "file": "audio/song01/박희은_bip.mp3",        "group": "vocal" },
+      { "name": "임진의",        "file": "audio/song01/임진의_bip.mp3",        "group": "vocal" },
+      { "name": "좌싱어 1",      "file": "audio/song01/죄싱어1_bip.mp3",       "group": "vocal" },
+      { "name": "좌싱어 2",      "file": "audio/song01/죄싱어2_bip.mp3",       "group": "vocal" },
+      { "name": "좌싱어 3",      "file": "audio/song01/좌싱어3_bip.mp3",       "group": "vocal" },
+      { "name": "드럼 (1)",      "file": "audio/song01/드럼1_bip.mp3",         "group": "drums" },
+      { "name": "드럼 (2)",      "file": "audio/song01/드럼2_bip.mp3",         "group": "drums" },
+      { "name": "베이스기타",    "file": "audio/song01/베이스기타_bip.mp3",    "group": "bass"  },
+      { "name": "어쿠스틱",      "file": "audio/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
+      { "name": "신디 (1)",      "file": "audio/song01/신디1_bip.mp3",         "group": "keys"  },
+      { "name": "신디 (2)",      "file": "audio/song01/신디2_bip.mp3",         "group": "keys"  }
     ]
   }
 ]
