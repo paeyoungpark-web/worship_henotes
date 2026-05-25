@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>찬양팀 실황 모니터 · M32 Style</title>
+  <title>은천교회 찬양팀 모니터링 시스템</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 </head>
-<body class="m32-theme">
+<body>
 
-  <!-- 핀 잠금 화면 -->
+  <!-- PIN 잠금 화면 -->
   <div id="pin-screen">
     <div class="pin-box">
-      <div class="pin-logo">◉</div>
-      <div class="pin-title">WORSHIP MONITOR</div>
+      <div class="pin-logo">✟</div>
+      <div class="pin-title">EUNCHEON WORSHIP</div>
       <div class="pin-sub">PIN을 입력하세요</div>
       <div id="pin-dots">
         <span class="dot"></span><span class="dot"></span>
@@ -36,192 +39,223 @@
     </div>
   </div>
 
-  <!-- 상단 헤더 -->
-  <header class="console-header">
-    <div class="brand">
-      <span class="logo">◉</span>
-      <span class="brand-name">WORSHIP MONITOR</span>
-      <span class="brand-sub">M32 STYLE</span>
+  <!-- ======= 홈 뷰 ======= -->
+  <section id="view-home" class="view view-home">
+    <!-- 헤로 -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="church-logo">
+          <img src="http://www.dgeunchun.org/user/saveDir/awd/P/0/image_178876.png?itemTime=1779693074"
+               alt="은천교회" class="logo-img"
+               onerror="this.style.display='none'">
+        </div>
+        <h1 class="hero-title">
+          <span class="hero-title-sub">은천교회 찬양팀</span>
+          <span class="hero-title-main">Worship Monitor</span>
+        </h1>
+        <p class="hero-verse">
+          "주를 찬송하라 새 노래로<br>땅끝에서부터 그를 찬송하라"
+          <span class="verse-ref">— 이사야 42:10</span>
+        </p>
+        <div class="hero-cta">
+          <button class="cta-btn cta-primary" onclick="scrollToId('latest')">🎵 최근 예배 듣기</button>
+          <button class="cta-btn cta-secondary" onclick="scrollToId('archive')">📅 전체 회차 보기</button>
+        </div>
+      </div>
     </div>
-    <div class="status-bar">
-      <span class="status-led" id="status-led"></span>
-      <span id="status-text">READY</span>
-    </div>
-  </header>
 
-  <main>
-    <!-- 곡 목록 뷰 -->
-    <section id="view-list" class="view">
-      <div class="section-title">▸ SCENE LIST</div>
-      <div id="song-list"></div>
+    <!-- 최근 회차 -->
+    <section id="latest" class="latest-section">
+      <div class="section-header">
+        <h2><span class="section-icon">✨</span> 가장 최근 예배</h2>
+        <p class="section-sub">이번 주 찬양 모니터링하세요</p>
+      </div>
+      <div id="latest-service"></div>
     </section>
 
-    <!-- 플레이어 뷰 -->
-    <section id="view-player" class="view hidden">
+    <!-- 아카이브 -->
+    <section id="archive" class="archive-section">
+      <div class="section-header">
+        <h2><span class="section-icon">📚</span> 회차 아카이브</h2>
+        <p class="section-sub">날짜를 선택해 원하는 예배를 찾아보세요</p>
+      </div>
+      <div class="archive-filters">
+        <div class="filter-group">
+          <label>연도</label>
+          <select id="filter-year"></select>
+        </div>
+        <div class="filter-group">
+          <label>월</label>
+          <select id="filter-month"></select>
+        </div>
+        <div class="filter-group filter-search">
+          <label>검색</label>
+          <input type="text" id="filter-search" placeholder="곡명·인도자 검색">
+        </div>
+      </div>
+      <div id="archive-list" class="archive-list"></div>
+    </section>
 
+    <!-- 푸터 -->
+    <footer class="church-footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="http://www.dgeunchun.org/user/saveDir/awd/P/0/image_178876.png?itemTime=1779693074"
+               alt="은천교회" onerror="this.style.display='none'">
+        </div>
+        <div class="footer-info">
+          <p class="footer-title">대한예수교장로회 은천교회</p>
+          <p class="footer-sub">찬양팀 모니터링 시스템 · For Worship Team Only</p>
+          <p class="footer-verse">"내가 사망의 음침한 골짜기로 다닐지라도 해를 두려워하지 않을 것은 주께서 나와 함께 하심이라"</p>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ======= 회차 상세 뷰 ======= -->
+  <section id="view-service" class="view view-service hidden">
+    <header class="page-header">
+      <button id="back-to-home" class="btn-back-page">◀ 홈으로</button>
+      <div class="page-header-info">
+        <div id="service-week" class="service-week-badge"></div>
+        <h1 id="service-title-display" class="page-title">—</h1>
+        <p id="service-date-display" class="page-subtitle">—</p>
+      </div>
+    </header>
+    <div class="service-meta">
+      <div class="meta-item"><span class="meta-label">👤 인도</span><span id="service-leader" class="meta-value">—</span></div>
+      <div class="meta-item"><span class="meta-label">📖 말씀</span><span id="service-theme"  class="meta-value">—</span></div>
+    </div>
+    <div id="teams-container"></div>
+  </section>
+
+  <!-- ======= 플레이어 뷰 (M32 콘솔) ======= -->
+  <section id="view-player" class="view view-player hidden">
+    <header class="console-header">
+      <div class="brand">
+        <span class="logo">◉</span>
+        <span class="brand-name">EUNCHEON · WORSHIP MONITOR</span>
+      </div>
+      <div class="status-bar">
+        <span class="status-led" id="status-led"></span>
+        <span id="status-text">READY</span>
+      </div>
+    </header>
+
+    <main class="player-main">
       <div class="player-top">
-        <button id="back-btn" class="btn-back">◀ SCENES</button>
+        <button id="back-btn" class="btn-back">◀ 회차로</button>
         <div class="song-info">
           <div id="song-title" class="song-title-display">—</div>
-          <div id="song-date" class="song-date-display">—</div>
+          <div id="song-date"  class="song-date-display">—</div>
         </div>
         <div class="my-part-box">
-          <label>MY CH</label>
+          <label>MY CH 1</label>
           <select id="my-part-select"></select>
+          <label>+ 2</label>
+          <select id="my-part-select2"><option value="-1">— 없음 —</option></select>
         </div>
       </div>
 
       <!-- 트랜스포트 -->
       <div class="transport-bar">
-        <button id="play-btn" class="tr-btn tr-play" title="재생">
-          <span class="tr-icon">▶</span><span class="tr-label">PLAY</span>
-        </button>
-        <button id="pause-btn" class="tr-btn tr-pause" title="일시정지" disabled>
-          <span class="tr-icon">❚❚</span><span class="tr-label">PAUSE</span>
-        </button>
-        <button id="stop-btn" class="tr-btn tr-stop" title="정지" disabled>
-          <span class="tr-icon">■</span><span class="tr-label">STOP</span>
-        </button>
+        <button id="play-btn"  class="tr-btn tr-play"><span class="tr-icon">▶</span><span class="tr-label">PLAY</span></button>
+        <button id="pause-btn" class="tr-btn tr-pause" disabled><span class="tr-icon">❚❚</span><span class="tr-label">PAUSE</span></button>
+        <button id="stop-btn"  class="tr-btn tr-stop"  disabled><span class="tr-icon">■</span><span class="tr-label">STOP</span></button>
         <div class="time-display">
           <span id="time-current">0:00.0</span>
           <span class="time-sep">/</span>
           <span id="time-total">0:00.0</span>
         </div>
         <div class="loop-cluster">
-          <button id="loop-a-btn" class="tr-btn-sm">SET A</button>
-          <button id="loop-b-btn" class="tr-btn-sm">SET B</button>
+          <button id="loop-a-btn"      class="tr-btn-sm">SET A</button>
+          <button id="loop-b-btn"      class="tr-btn-sm">SET B</button>
           <button id="loop-toggle-btn" class="tr-btn-sm">LOOP OFF</button>
         </div>
       </div>
 
-      <!-- 파형 시각화 -->
-      <canvas id="waveform-canvas" height="48" style="width:100%;display:block;background:#0a0a0c;margin-bottom:2px;cursor:pointer;"></canvas>
+      <!-- 파형 + 시크바 -->
+      <canvas id="waveform-canvas" height="40" style="width:100%;display:block;background:#0a0a0c;"></canvas>
+      <div class="seek-row"><input type="range" id="seek-bar" value="0" min="0" max="1000" step="1"></div>
 
-      <!-- 시크바 -->
-      <div class="seek-row">
-        <input type="range" id="seek-bar" value="0" min="0" max="1000" step="1">
-      </div>
-
-      <!-- MY CH 시각화 패널 -->
+      <!-- MY CH 시각화 패널 (중앙 정렬) -->
       <div id="my-vis-panel" class="my-vis-panel hidden">
         <div class="my-vis-header">
           <span class="my-vis-ch" id="my-vis-ch">CH 00</span>
           <span class="my-vis-name" id="my-vis-name"></span>
           <span class="my-vis-badge">MY CHANNEL</span>
-          <button id="vis-toggle-btn" class="vis-toggle active" title="시각화 ON/OFF">👁 ON</button>
+          <button id="vis-toggle-btn" class="vis-toggle active">👁 ON</button>
         </div>
-        <!-- 1행 3칸 레이아웃 -->
         <div class="my-vis-body">
-          <div class="vis-cell">
-            <div class="vis-label">🎵 SPECTRUM</div>
-            <canvas id="spec-canvas" class="vis-canvas"></canvas>
-          </div>
-          <div class="vis-cell">
-            <div class="vis-label">📊 VU PEAK</div>
-            <canvas id="vu-canvas" class="vis-canvas"></canvas>
-          </div>
-          <div class="vis-cell">
-            <div class="vis-label">🎤 LEVEL</div>
-            <canvas id="large-vu-canvas" class="vis-canvas"></canvas>
-          </div>
+          <div class="vis-cell"><div class="vis-label">🎵 SPECTRUM</div><canvas id="spec-canvas"     class="vis-canvas"></canvas></div>
+          <div class="vis-cell"><div class="vis-label">📊 VU PEAK</div> <canvas id="vu-canvas"       class="vis-canvas"></canvas></div>
+          <div class="vis-cell"><div class="vis-label">🎤 LEVEL</div>   <canvas id="large-vu-canvas" class="vis-canvas"></canvas></div>
         </div>
       </div>
 
-      <!-- 프리셋 (Scene 버튼) -->
+      <!-- 프리셋 -->
       <div class="scene-bar">
         <div class="scene-label">SCENES</div>
         <button data-preset="all"          class="scene-btn active">ALL</button>
         <button data-preset="me_solo"      class="scene-btn">SOLO ME</button>
-        <button data-preset="me_full"      class="scene-btn">ME + BAND</button>
+        <button data-preset="me_full"      class="scene-btn">ME+BAND</button>
         <button data-preset="singers"      class="scene-btn">리더+싱어</button>
-        <button data-preset="singers_only" class="scene-btn">좌우싱어만</button>
+        <button data-preset="singers_only" class="scene-btn">좌우싱어</button>
         <button data-preset="instruments"  class="scene-btn">악기만</button>
         <button data-preset="me_rhythm"    class="scene-btn">ME+RHYTHM</button>
         <button data-preset="me_keys"      class="scene-btn">ME+KEYS</button>
         <button data-preset="me_minus"     class="scene-btn">MINUS ME</button>
       </div>
 
-      <!-- 채널 스트립 영역 -->
+      <!-- 채널 스트립 -->
       <div class="console-wrap">
         <div id="channel-strips" class="channel-strips"></div>
-        <!-- 마스터 스트립 -->
         <div class="master-strip">
           <div class="ch-header master-header">MASTER</div>
-          <div class="ch-meter-frame">
-            <div class="ch-meter" id="master-meter"></div>
-          </div>
+          <div class="ch-meter-frame"><div class="ch-meter" id="master-meter"></div></div>
           <div class="ch-fader-frame">
             <input type="range" class="fader master-fader" id="master-fader"
               min="-60" max="6" step="0.5" value="0" orient="vertical">
-            <div class="fader-scale">
-              <span>+6</span><span>0</span><span>-10</span><span>-20</span><span>-40</span><span>∞</span>
-            </div>
+            <div class="fader-scale"><span>+6</span><span>0</span><span>-10</span><span>-20</span><span>-40</span><span>∞</span></div>
           </div>
           <div class="ch-db-readout" id="master-db">0.0 dB</div>
         </div>
       </div>
 
-      <!-- 하단 액션 -->
+      <!-- 액션 -->
       <div class="action-bar">
         <button id="copy-mix-btn" class="action-btn">📋 EXPORT MIX</button>
         <button id="feedback-btn" class="action-btn">💬 FEEDBACK</button>
         <button id="info-btn"     class="action-btn">ⓘ HELP</button>
       </div>
 
-      <!-- 로딩 오버레이 -->
+      <!-- 로딩 -->
       <div id="loading" class="loading-overlay hidden">
         <div class="loading-box">
           <div class="loading-led"></div>
           <div class="loading-text">LOADING SCENE...</div>
-          <div class="loading-progress-bar">
-            <div class="loading-progress-fill" id="loading-fill"></div>
-          </div>
+          <div class="loading-progress-bar"><div class="loading-progress-fill" id="loading-fill"></div></div>
           <div class="loading-percent"><span id="loading-progress">0</span>%</div>
         </div>
       </div>
 
-      <!-- 도움말 모달 -->
+      <!-- 도움말 -->
       <div id="help-modal" class="modal hidden">
         <div class="modal-content">
           <button class="modal-close" id="help-close">✕</button>
           <h2>🎛 컨트롤 가이드</h2>
-          <div class="help-section">
-            <h3>🎚 페이더 (FADER)</h3>
-            <p>각 채널의 볼륨을 dB 단위로 조절합니다. 0 dB가 기본값이며, 위로 올리면 크게(+6 dB까지), 아래로 내리면 작게 들립니다.</p>
-          </div>
-          <div class="help-section">
-            <h3>🔇 MUTE (M)</h3>
-            <p>해당 채널을 일시적으로 끕니다. 페이더 값은 유지되며, 해제 시 원래 볼륨으로 돌아옵니다.</p>
-          </div>
-          <div class="help-section">
-            <h3>🟡 SOLO (S)</h3>
-            <p>이 채널만 듣고 나머지는 끕니다. 여러 채널을 SOLO로 켜면 그 채널들끼리만 들립니다.</p>
-          </div>
-          <div class="help-section">
-            <h3>🌫 REVERB (REV)</h3>
-            <p>가상의 공간 울림을 추가합니다. 보컬 15~25%, 악기 5~15% 권장.</p>
-          </div>
-          <div class="help-section">
-            <h3>↔ PAN</h3>
-            <p>좌(L) / 우(R) 스테레오 위치 조절. C(가운데)가 기본.</p>
-          </div>
-          <div class="help-section">
-            <h3>📍 SCENES (프리셋)</h3>
-            <p>"MY CH"에서 자기 채널을 먼저 선택한 후 사용하세요.</p>
-          </div>
-          <div class="help-section">
-            <h3>🔁 LOOP A-B</h3>
-            <p>SET A → SET B 순서로 구간 지정 후 LOOP ON 으로 무한 반복. 어려운 구간 연습에 유용.</p>
-          </div>
-          <div class="help-section">
-            <h3>📤 EXPORT MIX</h3>
-            <p>현재 모든 채널의 볼륨/리버브/팬/뮤트 상태를 텍스트로 클립보드에 복사. 믹스 담당자에게 제안할 때 사용.</p>
-          </div>
+          <div class="help-section"><h3>🎚 FADER</h3><p>각 채널 볼륨. 0 dB가 원본, +6까지 증폭, -∞까지 감쇄.</p></div>
+          <div class="help-section"><h3>🔇 MUTE / 🟡 SOLO</h3><p>MUTE는 음소거, SOLO는 그 채널만 듣기.</p></div>
+          <div class="help-section"><h3>🌫 REVERB</h3><p>악기별 맞춤 이펙터. 신디=코러스, 베이스=EQ, 기타=Air EQ, 드럼=Room.</p></div>
+          <div class="help-section"><h3>↔ PAN</h3><p>좌우 스테레오 위치 조절.</p></div>
+          <div class="help-section"><h3>📍 SCENES</h3><p>MY CH 선택 후 프리셋으로 한 번에 믹스 전환.</p></div>
+          <div class="help-section"><h3>🔁 LOOP A-B</h3><p>SET A → SET B → LOOP ON으로 구간 반복.</p></div>
+          <div class="help-section"><h3>⌨️ 키보드</h3><p>← → 곡 이동 · ↑ ↓ MY CH 볼륨 · Space 재생/정지</p></div>
         </div>
       </div>
-
-    </section>
-  </main>
+    </main>
+  </section>
 
   <script src="js/mixer.js"></script>
   <script src="js/visualizer.js"></script>

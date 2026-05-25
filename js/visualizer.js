@@ -143,7 +143,8 @@ class WorshipVisualizer {
     // 레벨 계산
     const data = new Uint8Array(t.analyser.frequencyBinCount);
     t.analyser.getByteFrequencyData(data);
-    const level = data.reduce((a, v) => a + v, 0) / (data.length * 255);
+    const rawLevel = data.reduce((a, v) => a + v, 0) / (data.length * 255);
+    const level = Math.min(rawLevel * 2.5, 1); // 증폭
 
     // 피크 홀드
     if (!this.myPeak) this.myPeak = 0;
@@ -171,8 +172,11 @@ class WorshipVisualizer {
     // 피크 표시선
     if (this.myPeak > 0.01) {
       const peakY = H - this.myPeak * H;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(W * 0.1, peakY - 1.5 * DPR, W * 0.8, 3 * DPR);
+      ctx.fillStyle = '#00e5ff'; // 시안 피크
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur  = 6;
+      ctx.fillRect(W * 0.1, peakY - 2 * DPR, W * 0.8, 4 * DPR);
+      ctx.shadowBlur = 0;
     }
 
     // dB 눈금
@@ -207,7 +211,8 @@ class WorshipVisualizer {
 
     const data = new Uint8Array(t.analyser.frequencyBinCount);
     t.analyser.getByteFrequencyData(data);
-    const level = data.reduce((a, v) => a + v, 0) / (data.length * 255);
+    const rawLvl = data.reduce((a, v) => a + v, 0) / (data.length * 255);
+    const level = Math.min(rawLvl * 2.5, 1);
 
     // 피크
     if (!this.largePeak) this.largePeak = 0;

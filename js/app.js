@@ -1,17 +1,18 @@
 /**
- * app.js — 메인 컨트롤러 (M32 Style)
+ * app.js — 은천교회 Worship Monitor (홈 + 회차 + M32 플레이어)
  */
 
-let songs          = [];
-let mixer          = null;
-let visualizer     = null;
-let currentSong    = null;
-let myPartIdx      = -1;   // 주 채널
-let myPartIdx2     = -1;   // 서브 채널 (듀얼)
-let updateTimer    = null;
+let allServices = [];
+let currentService = null;
+let currentSongData = null;
+let mixer     = null;
+let visualizer = null;
+let myPartIdx  = -1;
+let myPartIdx2 = -1;
+let updateTimer = null;
 
 const FEEDBACK_FORM_URL = '';
-const PIN_CODE          = '8883';
+const PIN_CODE = '8883';
 
 /* ── PIN 인증 ── */
 (function initPin() {
@@ -22,10 +23,7 @@ const PIN_CODE          = '8883';
   let entered = '';
   const dots  = document.querySelectorAll('.dot');
   const errEl = document.getElementById('pin-error');
-
-  function updateDots() {
-    dots.forEach((d, i) => d.classList.toggle('filled', i < entered.length));
-  }
+  function updateDots() { dots.forEach((d,i) => d.classList.toggle('filled', i < entered.length)); }
   function shake() {
     errEl.classList.remove('hidden');
     errEl.style.animation = 'none';
@@ -36,32 +34,25 @@ const PIN_CODE          = '8883';
     if (entered === PIN_CODE) {
       sessionStorage.setItem('worship_auth', 'ok');
       document.getElementById('pin-screen').classList.add('unlocked');
-    } else {
-      shake();
-      entered = '';
-      updateDots();
-    }
+    } else { shake(); entered = ''; updateDots(); }
   }
-
-  // 마우스/터치
   document.querySelectorAll('.pin-key').forEach(btn => {
     btn.addEventListener('click', () => {
       const n = btn.dataset.n;
-      if (n === 'del') { entered = entered.slice(0, -1); }
-      else if (n === 'ok') { tryUnlock(); }
-      else if (entered.length < 4) { entered += n; }
+      if (n === 'del') entered = entered.slice(0,-1);
+      else if (n === 'ok') { tryUnlock(); return; }
+      else if (entered.length < 4) entered += n;
       updateDots();
       if (entered.length === 4) setTimeout(tryUnlock, 150);
     });
   });
-
-  // 키보드
   document.addEventListener('keydown', e => {
-    if (document.getElementById('pin-screen').classList.contains('unlocked')) return;
-    if (e.key >= '0' && e.key <= '9' && entered.length < 4) { entered += e.key; updateDots(); }
-    else if (e.key === 'Backspace') { entered = entered.slice(0,-1); updateDots(); }
-    else if (e.key === 'Enter') tryUnlock();
-    if (entered.length === 4) setTimeout(tryUnlock, 150);
+    if (!document.getElementById('pin-screen').classList.contains('unlocked')) {
+      if (e.key >= '0' && e.key <= '9' && entered.length < 4) { entered += e.key; updateDots(); }
+      else if (e.key === 'Backspace') { entered = entered.slice(0,-1); updateDots(); }
+      else if (e.key === 'Enter') tryUnlock();
+      if (entered.length === 4) setTimeout(tryUnlock, 150);
+    }
   });
 })();
 
@@ -71,24 +62,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   visualizer = new WorshipVisualizer();
 
   try {
-    const res = await fetch('data/songs.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    songs = await res.json();
-
-    // name/group 자동 보완
-    songs.forEach(song => {
-      song.tracks.forEach(t => {
-        if (!t.name) {
-          t.name = t.file.split('/').pop().replace(/\.[^.]+$/, '').replace(/_bip$/, '');
-        }
-        if (!t.group) t.group = UI.inferGroup(t.name);
-      });
-    });
-
-    UI.renderSongList(songs, loadSong);
+    const res = await fetch('data/services.json');
+    const data = await res.json();
+    allServices = (data.services || []).sort((a,b) => b.date.localeCompare(a.date));
+    renderHome();
   } catch (e) {
-    document.getElementById('song-list').innerHTML =
-      `<div style="padding:20px;color:var(--red)">⚠ 곡 데이터 로딩 실패: ${e.message}</div>`;
+    console.error(e);
+    document.getElementById('archive-list').innerHTML =
+      `<div class="archive-empty">⚠ 데이터 로딩 실패: ${e.message}</div>`;
   }
 
   bindGlobalEvents();
@@ -96,104 +77,202 @@ document.addEventListener('DOMContentLoaded', async () => {
   UI.setTransportState('ready');
 });
 
-/* ── 곡 로딩 ── */
-async function loadSong(idx) {
-  currentSong = songs[idx];
-  UI.showView('player');
+/* ══════════════ 홈 렌더링 ══════════════ */
+function renderHome() {
+  if (allServices.length > 0) renderLatestService(allServices[0]);
+  populateFilters();
+  renderArchive(allServices);
+}
+
+function renderLatestService(s) {
+  const total = s.teams.reduce((n,t) => n + (t.songs?.length||0), 0);
+  document.getElementById('latest-service').innerHTML = `
+    <div class="latest-card-inner">
+      <div class="latest-badge">LATEST · ${s.week||''}</div>
+      <div class="latest-date">📅 ${formatDateKr(s.date)}</div>
+      <h3 class="latest-title">${s.title}</h3>
+      <p class="latest-meta">${s.leader?`👤 ${s.leader}`:''}${s.theme?` · 📖 ${s.theme}`:''}</p>
+      <div class="latest-teams">
+        ${s.teams.map(t=>`<div class="team-chip">${t.name}<span class="team-chip-count">${t.songs?.length||0}곡</span></div>`).join('')}
+      </div>
+      <button class="latest-cta" onclick="openService('${s.id}')">🎵 ${total}곡 모니터링하기 →</button>
+    </div>`;
+}
+
+function populateFilters() {
+  const years = new Set();
+  allServices.forEach(s => { if (s.date) years.add(s.date.slice(0,4)); });
+  const ySel = document.getElementById('filter-year');
+  ySel.innerHTML = '<option value="">전체 연도</option>' +
+    [...years].sort().reverse().map(y => `<option value="${y}">${y}년</option>`).join('');
+  const mSel = document.getElementById('filter-month');
+  mSel.innerHTML = '<option value="">전체 월</option>' +
+    Array.from({length:12},(_,i)=>`<option value="${(i+1).toString().padStart(2,'0')}">${i+1}월</option>`).join('');
+}
+
+function renderArchive(services) {
+  const el = document.getElementById('archive-list');
+  if (!services.length) { el.innerHTML = '<div class="archive-empty">해당 조건의 예배가 없습니다.</div>'; return; }
+  el.innerHTML = services.map(s => {
+    const total = s.teams.reduce((n,t)=>n+(t.songs?.length||0),0);
+    return `<div class="service-card" onclick="openService('${s.id}')">
+      <div class="service-card-week">${s.week||''}</div>
+      <div class="service-card-date">${formatDateKr(s.date)}</div>
+      <div class="service-card-title">${s.title}</div>
+      <div class="service-card-teams">
+        ${s.teams.map(t=>`<span class="service-card-team">${t.name} · ${t.songs?.length||0}곡</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function applyFilters() {
+  const year   = document.getElementById('filter-year').value;
+  const month  = document.getElementById('filter-month').value;
+  const search = document.getElementById('filter-search').value.toLowerCase().trim();
+  let list = allServices;
+  if (year)   list = list.filter(s => s.date.startsWith(year));
+  if (month)  list = list.filter(s => s.date.slice(5,7) === month);
+  if (search) list = list.filter(s =>
+    s.leader?.toLowerCase().includes(search) ||
+    s.theme?.toLowerCase().includes(search)  ||
+    s.teams.some(t => t.leader?.toLowerCase().includes(search) ||
+      t.songs?.some(sg => sg.title.toLowerCase().includes(search)))
+  );
+  renderArchive(list);
+}
+
+/* ══════════════ 회차 상세 ══════════════ */
+function openService(serviceId) {
+  const s = allServices.find(x => x.id === serviceId);
+  if (!s) return;
+  currentService = s;
+  document.getElementById('service-week').textContent         = s.week || '';
+  document.getElementById('service-title-display').textContent = s.title || '';
+  document.getElementById('service-date-display').textContent  = formatDateKr(s.date);
+  document.getElementById('service-leader').textContent = s.leader || '—';
+  document.getElementById('service-theme').textContent  = s.theme  || '—';
+
+  document.getElementById('teams-container').innerHTML = s.teams.map((team, ti) => `
+    <div class="team-section">
+      <div class="team-header">
+        <div class="team-icon">${ti+1}</div>
+        <div class="team-info">
+          <div class="team-name">${team.name}</div>
+          <div class="team-leader">${team.leader?`👤 ${team.leader}`:''}</div>
+        </div>
+      </div>
+      <div class="song-list">
+        ${(team.songs||[]).map((song, si) => `
+          <div class="song-item${song.type==='speech'?' speech':''}"
+               onclick="openSong('${s.id}',${ti},${si})">
+            <div class="song-number">${si+1}</div>
+            <div class="song-details">
+              <div class="song-name">${song.title}</div>
+              <div class="song-meta">${song.duration||''} · ${song.tracks?.length||0}채널${song.type==='speech'?' · 멘트':''}</div>
+            </div>
+            <div class="song-play-icon">▶</div>
+          </div>`).join('') || '<div style="padding:20px;color:#999;text-align:center;">곡이 아직 업로드되지 않았습니다.</div>'}
+      </div>
+    </div>`).join('');
+
+  showView('service');
+  window.scrollTo(0, 0);
+}
+
+/* ══════════════ 플레이어 ══════════════ */
+async function openSong(serviceId, teamIdx, songIdx) {
+  const s    = allServices.find(x => x.id === serviceId);
+  const song = s?.teams?.[teamIdx]?.songs?.[songIdx];
+  if (!song || !song.tracks?.length) return;
+
+  currentSongData = { ...song, _service: s, _team: s.teams[teamIdx] };
+  showView('player');
   UI.showLoading(true, 0);
 
-  document.getElementById('song-title').textContent = currentSong.title;
-  document.getElementById('song-date').textContent  = currentSong.date || '';
+  document.getElementById('song-title').textContent = song.title;
+  document.getElementById('song-date').textContent  = `${formatDateKr(s.date)} · ${s.teams[teamIdx].name}`;
+
+  // name/group 자동 보완
+  song.tracks.forEach(t => {
+    if (!t.name)  t.name  = decodeURIComponent(t.file.split('/').pop().replace(/\.[^.]+$/, '').replace(/_bip$/, ''));
+    if (!t.group) t.group = UI.inferGroup(t.name);
+  });
 
   stopUpdateLoop();
   mixer.unloadAll();
   await mixer.init();
+  mixer.setSongSegment(song.start || 0, song.end || null);
 
-  // 곡 구간 설정 (start/end 있으면 적용)
-  mixer.setSongSegment(currentSong.start || 0, currentSong.end || null);
+  if (!mixer.reverbLoaded) await mixer.loadReverbIR('audio/ir/church_hall.wav');
 
-  if (!mixer.reverbLoaded) {
-    await mixer.loadReverbIR('audio/ir/church_hall.wav');
-  }
-
-  // 순차 로딩 (진행도 표시)
-  const total = currentSong.tracks.length;
-  let loaded  = 0;
-  await mixer.loadAllTracks(currentSong.tracks, () => {
+  let loaded = 0;
+  const total = song.tracks.length;
+  await mixer.loadAllTracks(song.tracks, () => {
     loaded++;
-    UI.showLoading(true, Math.round((loaded / total) * 100));
+    UI.showLoading(true, Math.round((loaded/total)*100));
   });
 
-  // UI 구성
-  UI.renderMyPartSelector(currentSong.tracks);
-  UI.renderChannelStrips(currentSong.tracks, mixer);
+  UI.renderMyPartSelector(song.tracks);
+  UI.renderChannelStrips(song.tracks, mixer);
   visualizer.init(mixer);
-  UI.initWaveform();
+
   UI.showLoading(false);
   UI.setTransportState('ready');
 
-  // 시크바 초기화 (songDuration 기준)
-  const seekBar   = document.getElementById('seek-bar');
-  seekBar.value   = 0;
-  seekBar.max     = Math.floor(mixer.songDuration * 1000);
+  const seekBar = document.getElementById('seek-bar');
+  seekBar.value = 0;
+  seekBar.max   = Math.floor(mixer.songDuration * 1000);
 
-  // 루프 버튼 초기화
+  // 초기화
+  myPartIdx = myPartIdx2 = -1;
+  document.getElementById('my-part-select').value  = '-1';
+  document.getElementById('my-part-select2').value = '-1';
+  document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-preset="all"]').classList.add('active');
   document.getElementById('loop-a-btn').textContent = 'SET A';
   document.getElementById('loop-b-btn').textContent = 'SET B';
   document.getElementById('loop-toggle-btn').textContent = 'LOOP OFF';
   document.getElementById('loop-toggle-btn').classList.remove('active');
 
-  // 프리셋 초기화
-  document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
-  document.querySelector('[data-preset="all"]').classList.add('active');
-
-  // 내 파트 초기화
-  myPartIdx = -1;
-  document.getElementById('my-part-select').value = '-1';
-
   updateTimeDisplay();
   startUpdateLoop();
 }
 
-/* ── 전역 이벤트 ── */
+/* ══════════════ 글로벌 이벤트 ══════════════ */
 function bindGlobalEvents() {
+  // 필터
+  ['filter-year','filter-month'].forEach(id =>
+    document.getElementById(id).addEventListener('change', applyFilters));
+  document.getElementById('filter-search').addEventListener('input', applyFilters);
 
-  // 뒤로가기
+  // 홈 ← 회차
+  document.getElementById('back-to-home').addEventListener('click', () => { showView('home'); window.scrollTo(0,0); });
+
+  // 회차 ← 플레이어
   document.getElementById('back-btn').addEventListener('click', () => {
-    mixer.stop();
-    stopUpdateLoop();
-    UI.setTransportState('ready');
-    UI.showView('list');
+    mixer.stop(); stopUpdateLoop(); UI.setTransportState('ready');
+    if (currentService) openService(currentService.id);
+    else showView('home');
   });
 
-  // 재생
+  // 재생 컨트롤
   document.getElementById('play-btn').addEventListener('click', async () => {
     if (!mixer.tracks.length) return;
     if (mixer.ctx?.state === 'suspended') await mixer.ctx.resume();
     mixer.play(mixer.pauseTime);
     UI.setTransportState('playing');
   });
-
-  // 일시정지
   document.getElementById('pause-btn').addEventListener('click', () => {
-    mixer.pause();
-    UI.setTransportState('paused');
-    updateTimeDisplay();
+    mixer.pause(); UI.setTransportState('paused'); updateTimeDisplay();
   });
-
-  // 정지
   document.getElementById('stop-btn').addEventListener('click', () => {
-    mixer.stop();
-    UI.setTransportState('ready');
-    document.getElementById('seek-bar').value = 0;
-    updateTimeDisplay();
+    mixer.stop(); UI.setTransportState('ready');
+    document.getElementById('seek-bar').value = 0; updateTimeDisplay();
   });
-
-  // 시크바
   document.getElementById('seek-bar').addEventListener('input', e => {
     if (!mixer.songDuration) return;
-    const t = (+e.target.value / +e.target.max) * mixer.songDuration;
-    mixer.seek(t);
+    mixer.seek((+e.target.value / +e.target.max) * mixer.songDuration);
     updateTimeDisplay();
   });
 
@@ -203,32 +282,29 @@ function bindGlobalEvents() {
     UI.highlightMyParts(myPartIdx, myPartIdx2);
     visualizer.setMyChannel(myPartIdx >= 0 ? myPartIdx : myPartIdx2);
   });
-  // MY CH 2 (듀얼)
+  // MY CH 2
   document.getElementById('my-part-select2').addEventListener('change', e => {
     myPartIdx2 = +e.target.value;
     UI.highlightMyParts(myPartIdx, myPartIdx2);
     if (myPartIdx < 0) visualizer.setMyChannel(myPartIdx2);
   });
 
-  // 시각화 ON/OFF 토글
+  // 시각화 ON/OFF
   document.getElementById('vis-toggle-btn').addEventListener('click', () => {
     const body = document.querySelector('.my-vis-body');
     const btn  = document.getElementById('vis-toggle-btn');
-    const on   = body.classList.toggle('hidden-body');
-    btn.textContent = on ? '👁 OFF' : '👁 ON';
-    btn.classList.toggle('active', !on);
+    const off  = body.classList.toggle('hidden-body');
+    btn.textContent = off ? '👁 OFF' : '👁 ON';
+    btn.classList.toggle('active', !off);
   });
 
-  // 프리셋
+  // 프리셋 — applyPresetDual 사용
   document.querySelectorAll('[data-preset]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const preset    = btn.dataset.preset;
-      const groupOK   = ['all','singers','singers_only','instruments'].includes(preset);
-      const hasMyPart = myPartIdx >= 0 || myPartIdx2 >= 0;
-      if (!hasMyPart && !groupOK) {
-        UI.toast('⚠ MY CH를 먼저 선택하세요');
-        return;
-      }
+      const preset  = btn.dataset.preset;
+      const grpOnly = ['all','singers','singers_only','instruments'].includes(preset);
+      const hasMy   = myPartIdx >= 0 || myPartIdx2 >= 0;
+      if (!hasMy && !grpOnly) { UI.toast('⚠ MY CH를 먼저 선택하세요'); return; }
       mixer.applyPresetDual(myPartIdx, myPartIdx2, preset);
       UI.syncFromMixer(mixer);
       document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
@@ -236,19 +312,15 @@ function bindGlobalEvents() {
     });
   });
 
-  // 루프 A
+  // 루프
   document.getElementById('loop-a-btn').addEventListener('click', () => {
     mixer.loop.a = mixer.getCurrentTime();
     document.getElementById('loop-a-btn').textContent = `A:${UI.formatTime(mixer.loop.a)}`;
   });
-
-  // 루프 B
   document.getElementById('loop-b-btn').addEventListener('click', () => {
     mixer.loop.b = mixer.getCurrentTime();
     document.getElementById('loop-b-btn').textContent = `B:${UI.formatTime(mixer.loop.b)}`;
   });
-
-  // 루프 토글
   document.getElementById('loop-toggle-btn').addEventListener('click', () => {
     mixer.loop.enabled = !mixer.loop.enabled;
     const btn = document.getElementById('loop-toggle-btn');
@@ -265,155 +337,80 @@ function bindGlobalEvents() {
 
   // Export Mix
   document.getElementById('copy-mix-btn').addEventListener('click', () => {
-    if (!currentSong) return;
-    const text = mixer.getMixText(currentSong.title);
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => UI.toast('📋 믹스 설정이 클립보드에 복사되었습니다'));
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
-      UI.toast('📋 클립보드에 복사되었습니다');
-    }
+    if (!currentSongData) return;
+    const text = mixer.getMixText(currentSongData.title);
+    navigator.clipboard?.writeText(text).then(() => UI.toast('📋 믹스값 복사됨'));
   });
 
   // 피드백
   document.getElementById('feedback-btn').addEventListener('click', () => {
-    if (!currentSong) return;
+    if (!currentSongData) return;
     const t    = UI.formatTime(mixer.getCurrentTime());
-    const name = myPartIdx >= 0 ? (mixer.tracks[myPartIdx]?.info?.name || '') : '전체';
-    if (FEEDBACK_FORM_URL) {
-      const url = new URL(FEEDBACK_FORM_URL);
-      url.searchParams.set('entry.SONG',  currentSong.title);
-      url.searchParams.set('entry.TRACK', name);
-      url.searchParams.set('entry.TIME',  t);
-      window.open(url.toString(), '_blank');
-    } else {
-      const msg = `[${currentSong.title}] ${t} / ${name} / `;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(msg).then(() => UI.toast('💬 피드백 양식 복사 완료 — 단톡방에 붙여넣으세요'));
-      }
-    }
+    const name = (myPartIdx >= 0 ? mixer.tracks[myPartIdx]?.info?.name : '') || '전체';
+    const msg  = `[${currentSongData.title}] ${t} / ${name} / `;
+    navigator.clipboard?.writeText(msg).then(() => UI.toast('💬 피드백 양식 복사됨 — 단톡방에 붙여넣으세요'));
   });
 
   // 도움말
-  document.getElementById('info-btn').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.remove('hidden');
-  });
-  document.getElementById('help-close').addEventListener('click', () => {
-    document.getElementById('help-modal').classList.add('hidden');
-  });
-  document.getElementById('help-modal').addEventListener('click', e => {
-    if (e.target.id === 'help-modal') document.getElementById('help-modal').classList.add('hidden');
-  });
+  document.getElementById('info-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
+  document.getElementById('help-close').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden'));
+  document.getElementById('help-modal').addEventListener('click', e => { if (e.target.id==='help-modal') e.target.classList.add('hidden'); });
 }
 
-/* ── 업데이트 루프 (20fps) ── */
-function startUpdateLoop() {
-  stopUpdateLoop();
-  updateTimer = setInterval(() => {
-    // 미터 + 파형 + 시각화
-    UI.updateMeters(mixer);
-    WorshipVisualizer.drawMasterWaveform(mixer);
-    visualizer.update();
-
-    if (!mixer.isPlaying) return;
-
-    // 루프 체크 (종료 신호면 UI 업데이트)
-    const ended = mixer.checkLoop();
-    if (ended) {
-      UI.setTransportState('ready');
-      document.getElementById('seek-bar').value = 0;
-      updateTimeDisplay();
-      return;
-    }
-
-    // 시크바 + 시간 업데이트
-    const cur = mixer.getCurrentTime();
-    const max = +document.getElementById('seek-bar').max;
-    document.getElementById('seek-bar').value = mixer.songDuration > 0 ? (cur / mixer.songDuration) * max : 0;
-    updateTimeDisplay();
-
-  }, 50);
-}
-
-function stopUpdateLoop() {
-  if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
-}
-
-/* ── 키보드 네비게이션 ── */
+/* ══════════════ 키보드 ══════════════ */
 function bindKeyboard() {
   document.addEventListener('keydown', e => {
-    // 입력 필드에 포커스 시 무시
+    if (document.getElementById('pin-screen') && !document.getElementById('pin-screen').classList.contains('unlocked')) return;
     if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (document.getElementById('view-player').classList.contains('hidden')) return;
 
     switch (e.key) {
-      case 'ArrowRight': {
-        // 다음 곡
-        if (!currentSong || !songs.length) break;
-        const idx  = songs.indexOf(currentSong);
-        const next = songs[idx + 1];
-        if (next) {
-          loadSong(songs.indexOf(next));
-          UI.toast(`▶ ${next.title}`);
-        } else {
-          UI.toast('⚠ 마지막 곡입니다');
-        }
-        e.preventDefault();
-        break;
-      }
-      case 'ArrowLeft': {
-        // 이전 곡
-        if (!currentSong || !songs.length) break;
-        const idx  = songs.indexOf(currentSong);
-        const prev = songs[idx - 1];
-        if (prev) {
-          loadSong(songs.indexOf(prev));
-          UI.toast(`◀ ${prev.title}`);
-        } else {
-          UI.toast('⚠ 첫 번째 곡입니다');
-        }
-        e.preventDefault();
-        break;
-      }
-      case 'ArrowUp': {
-        // MY CH 1+2 복합 +1dB
-        const idxs = [myPartIdx, myPartIdx2].filter(i => i >= 0);
-        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
-        idxs.forEach(i => {
-          const t = mixer.tracks[i]; if (!t) return;
-          const db = Math.min(t.volumeDb + 1, 6);
-          mixer.setTrackVolumeDb(i, db); _syncFaderUI(i, db);
-        });
-        const t1 = mixer.tracks[idxs[0]];
-        UI.toast(`🔊 MY CH +1dB → ${UI.dbToLabel(t1.volumeDb)} dB`);
+      case 'ArrowRight': { // 다음 곡
+        if (!currentService || !currentSongData) break;
+        const team = currentSongData._team;
+        const si = team.songs.indexOf(currentSongData) < 0
+          ? team.songs.findIndex(s=>s.id===currentSongData.id) : team.songs.indexOf(currentSongData);
+        const next = team.songs[si+1];
+        if (next) { openSong(currentService.id, currentService.teams.indexOf(team), si+1); UI.toast(`▶ ${next.title}`); }
+        else UI.toast('⚠ 마지막 곡');
         e.preventDefault(); break;
       }
-      case 'ArrowDown': {
-        // MY CH 1+2 복합 -1dB
-        const idxs = [myPartIdx, myPartIdx2].filter(i => i >= 0);
-        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
+      case 'ArrowLeft': { // 이전 곡
+        if (!currentService || !currentSongData) break;
+        const team = currentSongData._team;
+        const si = team.songs.findIndex(s=>s.id===currentSongData.id);
+        const prev = team.songs[si-1];
+        if (prev) { openSong(currentService.id, currentService.teams.indexOf(team), si-1); UI.toast(`◀ ${prev.title}`); }
+        else UI.toast('⚠ 첫 번째 곡');
+        e.preventDefault(); break;
+      }
+      case 'ArrowUp': { // MY CH +1dB
+        const idxs = [myPartIdx,myPartIdx2].filter(i=>i>=0);
+        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택'); break; }
         idxs.forEach(i => {
           const t = mixer.tracks[i]; if (!t) return;
-          const db = Math.max(t.volumeDb - 1, -60);
+          const db = Math.min(t.volumeDb+1, 6);
           mixer.setTrackVolumeDb(i, db); _syncFaderUI(i, db);
         });
-        const t1 = mixer.tracks[idxs[0]];
-        UI.toast(`🔉 MY CH -1dB → ${UI.dbToLabel(t1.volumeDb)} dB`);
+        UI.toast(`🔊 MY CH +1dB → ${UI.dbToLabel(mixer.tracks[idxs[0]].volumeDb)} dB`);
+        e.preventDefault(); break;
+      }
+      case 'ArrowDown': { // MY CH -1dB
+        const idxs = [myPartIdx,myPartIdx2].filter(i=>i>=0);
+        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택'); break; }
+        idxs.forEach(i => {
+          const t = mixer.tracks[i]; if (!t) return;
+          const db = Math.max(t.volumeDb-1, -60);
+          mixer.setTrackVolumeDb(i, db); _syncFaderUI(i, db);
+        });
+        UI.toast(`🔉 MY CH -1dB → ${UI.dbToLabel(mixer.tracks[idxs[0]].volumeDb)} dB`);
         e.preventDefault(); break;
       }
       case ' ': {
-        // 스페이스바 = 재생/일시정지
         if (!mixer.tracks.length) break;
-        if (mixer.isPlaying) {
-          mixer.pause();
-          UI.setTransportState('paused');
-        } else {
-          mixer.play(mixer.pauseTime);
-          UI.setTransportState('playing');
-        }
-        e.preventDefault();
-        break;
+        if (mixer.isPlaying) { mixer.pause(); UI.setTransportState('paused'); }
+        else { mixer.play(mixer.pauseTime); UI.setTransportState('playing'); }
+        e.preventDefault(); break;
       }
     }
   });
@@ -428,7 +425,57 @@ function _syncFaderUI(idx, db) {
   if (dbOut) dbOut.textContent = UI.dbToLabel(db) + ' dB';
 }
 
+/* ══════════════ 업데이트 루프 (20fps) ══════════════ */
+function startUpdateLoop() {
+  stopUpdateLoop();
+  updateTimer = setInterval(() => {
+    UI.updateMeters(mixer);
+    WorshipVisualizer.drawMasterWaveform(mixer);
+    visualizer.update();
+
+    if (!mixer.isPlaying) return;
+    const ended = mixer.checkLoop();
+    if (ended) {
+      UI.setTransportState('ready');
+      document.getElementById('seek-bar').value = 0;
+      updateTimeDisplay(); return;
+    }
+    const cur = mixer.getCurrentTime();
+    const max = +document.getElementById('seek-bar').max;
+    document.getElementById('seek-bar').value = mixer.songDuration > 0 ? (cur/mixer.songDuration)*max : 0;
+    updateTimeDisplay();
+  }, 50);
+}
+
+function stopUpdateLoop() {
+  if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
+}
+
 function updateTimeDisplay() {
   document.getElementById('time-current').textContent = UI.formatTime(mixer.getCurrentTime());
   document.getElementById('time-total').textContent   = UI.formatTime(mixer.songDuration);
 }
+
+/* ══════════════ 유틸 ══════════════ */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById(`view-${name}`).classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+function scrollToId(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior:'smooth' });
+}
+
+function formatDateKr(dateStr) {
+  if (!dateStr) return '';
+  const [y,m,d] = dateStr.split('-');
+  const date = new Date(+y, +m-1, +d);
+  const days = ['일','월','화','수','목','금','토'];
+  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일 (${days[date.getDay()]})`;
+}
+
+// 전역 노출
+window.openService = openService;
+window.openSong    = openSong;
+window.scrollToId  = scrollToId;
