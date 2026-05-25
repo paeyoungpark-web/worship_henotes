@@ -4,6 +4,7 @@
 
 let songs       = [];
 let mixer       = null;
+let visualizer  = null;
 let currentSong = null;
 let myPartIdx   = -1;
 let updateTimer = null;
@@ -12,7 +13,8 @@ const FEEDBACK_FORM_URL = ''; // 선택: Google Forms URL
 
 /* ── DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', async () => {
-  mixer = new WorshipMixer();
+  mixer      = new WorshipMixer();
+  visualizer = new WorshipVisualizer();
 
   try {
     const res = await fetch('data/songs.json');
@@ -70,6 +72,7 @@ async function loadSong(idx) {
   // UI 구성
   UI.renderMyPartSelector(currentSong.tracks);
   UI.renderChannelStrips(currentSong.tracks, mixer);
+  visualizer.init(mixer);
   UI.initWaveform();
   UI.showLoading(false);
   UI.setTransportState('ready');
@@ -143,6 +146,7 @@ function bindGlobalEvents() {
   document.getElementById('my-part-select').addEventListener('change', e => {
     myPartIdx = +e.target.value;
     UI.highlightMyPart(myPartIdx);
+    visualizer.setMyChannel(myPartIdx);
   });
 
   // 프리셋
@@ -235,9 +239,10 @@ function bindGlobalEvents() {
 function startUpdateLoop() {
   stopUpdateLoop();
   updateTimer = setInterval(() => {
-    // 미터 + 파형
+    // 미터 + 파형 + 시각화
     UI.updateMeters(mixer);
-    UI.drawWaveform(mixer);
+    WorshipVisualizer.drawMasterWaveform(mixer);
+    visualizer.update();
 
     if (!mixer.isPlaying) return;
 
