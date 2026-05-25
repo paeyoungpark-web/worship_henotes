@@ -8,3 +8,4 @@ Thumbs.db
 audio/song01/*.mp3
 audio/song02/*.mp3
 audio/**/*.mp3
+.wrangler/
