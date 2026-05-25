@@ -5,21 +5,21 @@
     "date": "2026-05-25",
     "duration": "",
     "tracks": [
-      { "name": "박재우목사님",  "file": "audio/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "audio/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "audio/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "audio/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "audio/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "audio/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "audio/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "audio/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "audio/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "audio/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "audio/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "audio/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "audio/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "audio/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "audio/song01/신디2_bip.mp3",         "group": "keys"  }
+      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
+      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
+      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
+      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
+      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
+      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
+      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
+      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
+      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
+      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
+      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
+      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
+      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
+      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
+      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
     ]
   }
 ]
