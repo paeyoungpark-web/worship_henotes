@@ -7,21 +7,100 @@
     "start": 772,
     "end": 846,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -32,21 +111,100 @@
     "start": 846,
     "end": 1070,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -57,21 +215,100 @@
     "start": 1070,
     "end": 1243,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -82,21 +319,100 @@
     "start": 1243,
     "end": 1411,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -107,21 +423,100 @@
     "start": 1411,
     "end": 1635,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -132,21 +527,100 @@
     "start": 1635,
     "end": 1690,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -157,21 +631,100 @@
     "start": 1690,
     "end": 1987,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   },
   {
@@ -182,21 +735,100 @@
     "start": 1987,
     "end": null,
     "tracks": [
-      { "name": "박재우목사님",  "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3", "group": "vocal" },
-      { "name": "목사 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",          "group": "vocal" },
-      { "name": "목사 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",         "group": "vocal" },
-      { "name": "박배영",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",        "group": "vocal" },
-      { "name": "박희은",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",        "group": "vocal" },
-      { "name": "임진의",        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",        "group": "vocal" },
-      { "name": "좌싱어 1",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 2",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",       "group": "vocal" },
-      { "name": "좌싱어 3",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",       "group": "vocal" },
-      { "name": "드럼 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",         "group": "drums" },
-      { "name": "드럼 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",         "group": "drums" },
-      { "name": "베이스기타",    "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",    "group": "bass"  },
-      { "name": "어쿠스틱",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",      "group": "guitar"},
-      { "name": "신디 (1)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",         "group": "keys"  },
-      { "name": "신디 (2)",      "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",         "group": "keys"  }
+      {
+        "ch": 1,
+        "name": "목사님 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
+        "group": "pastor",
+        "pan": -0.3
+      },
+      {
+        "ch": 2,
+        "name": "목사님 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
+        "group": "pastor",
+        "pan": 0.3
+      },
+      {
+        "ch": 3,
+        "name": "박재우 (리더)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
+        "group": "leader"
+      },
+      {
+        "ch": 4,
+        "name": "좌싱어 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어1_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 5,
+        "name": "장지은 (좌2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/죄싱어2_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 6,
+        "name": "김동은 (좌3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/좌싱어3_bip.mp3",
+        "group": "vocal_left"
+      },
+      {
+        "ch": 7,
+        "name": "임진의 (우1)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/임진의_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 8,
+        "name": "박배영 (우2)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박배영_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 9,
+        "name": "박희은 (우3)",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박희은_bip.mp3",
+        "group": "vocal_right"
+      },
+      {
+        "ch": 17,
+        "name": "신디 1",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디1_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 18,
+        "name": "신디 2",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/신디2_bip.mp3",
+        "group": "keys"
+      },
+      {
+        "ch": 19,
+        "name": "베이스",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/베이스기타_bip.mp3",
+        "group": "bass"
+      },
+      {
+        "ch": 20,
+        "name": "어쿠스틱",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/어쿼스틱_bip.mp3",
+        "group": "guitar"
+      },
+      {
+        "ch": 22,
+        "name": "드럼 L",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼1_bip.mp3",
+        "group": "drums",
+        "pan": -0.4
+      },
+      {
+        "ch": 23,
+        "name": "드럼 R",
+        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/드럼2_bip.mp3",
+        "group": "drums",
+        "pan": 0.4
+      }
     ]
   }
 ]

@@ -4,8 +4,12 @@
 const UI = {
 
   groupColorClass(group) {
-    return { vocal:'ch-group-vocal', drums:'ch-group-drums', bass:'ch-group-bass',
-             guitar:'ch-group-guitar', keys:'ch-group-keys', synth:'ch-group-keys' }[group] || 'ch-group-other';
+    return {
+      pastor:'ch-group-pastor', leader:'ch-group-leader',
+      vocal_left:'ch-group-vocal_left', vocal_right:'ch-group-vocal_right',
+      vocal:'ch-group-vocal', drums:'ch-group-drums', bass:'ch-group-bass',
+      guitar:'ch-group-guitar', keys:'ch-group-keys', synth:'ch-group-keys',
+    }[group] || 'ch-group-other';
   },
 
   dbToLabel(db) {
@@ -24,7 +28,8 @@ const UI = {
     });
 
     list.innerHTML = '';
-    Object.keys(byDate).sort().reverse().forEach(date => {
+    // 날짜 오름차순 (시간순) — 같은 날짜면 songs.json 순서 유지
+    Object.keys(byDate).sort().forEach(date => {
       const hdr = document.createElement('div');
       hdr.className = 'date-section-title';
       hdr.textContent = `▸ ${date}`;
@@ -63,7 +68,8 @@ const UI = {
       const strip  = document.createElement('div');
       strip.className = 'channel-strip';
       strip.dataset.idx = idx;
-      const chNum  = (idx + 1).toString().padStart(2, '0');
+      strip.dataset.group = t.group || 'other';
+      const chNum  = t.ch ? t.ch.toString().padStart(2, '0') : (idx + 1).toString().padStart(2, '0');
       const tName  = t.name || t.file.split('/').pop().replace(/\.[^.]+$/, '');
 
       strip.innerHTML = `
@@ -243,6 +249,90 @@ const UI = {
     el._t = setTimeout(() => { el.style.opacity = '0'; }, ms);
   },
 };
+
+/* ── 파형 시각화 ── */
+UI.waveformCtx = null;
+UI.initWaveform = function() {
+  const canvas = document.getElementById('waveform-canvas');
+  if (!canvas) return;
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  UI.waveformCtx = canvas.getContext('2d');
+};
+
+UI.drawWaveform = function(mixer) {
+  const canvas = document.getElementById('waveform-canvas');
+  const ctx2d  = UI.waveformCtx;
+  if (!canvas || !ctx2d) return;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  ctx2d.clearRect(0, 0, W, H);
+
+  // 배경
+  ctx2d.fillStyle = '#0a0a0c';
+  ctx2d.fillRect(0, 0, W, H);
+
+  if (!mixer.isPlaying || !mixer.masterAnalyser) {
+    // 정지 상태: 중앙선만
+    ctx2d.strokeStyle = '#2e3038';
+    ctx2d.lineWidth = 1;
+    ctx2d.beginPath();
+    ctx2d.moveTo(0, H / 2);
+    ctx2d.lineTo(W, H / 2);
+    ctx2d.stroke();
+    return;
+  }
+
+  // 시간영역 파형 (time domain)
+  const bufLen = mixer.masterAnalyser.fftSize;
+  mixer.masterAnalyser.fftSize = 1024;
+  const data = new Uint8Array(mixer.masterAnalyser.fftSize);
+  mixer.masterAnalyser.getByteTimeDomainData(data);
+
+  // 그라디언트 선
+  const grad = ctx2d.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0,   '#ff8c1a44');
+  grad.addColorStop(0.5, '#ff8c1aff');
+  grad.addColorStop(1,   '#ff8c1a44');
+
+  ctx2d.strokeStyle = grad;
+  ctx2d.lineWidth   = 1.5 * window.devicePixelRatio;
+  ctx2d.beginPath();
+
+  const step = W / data.length;
+  for (let i = 0; i < data.length; i++) {
+    const x = i * step;
+    const y = ((data[i] / 128.0) - 1) * (H * 0.45) + H / 2;
+    i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+  }
+  ctx2d.stroke();
+
+  // 중앙 0선
+  ctx2d.strokeStyle = '#2e3038';
+  ctx2d.lineWidth   = 0.5;
+  ctx2d.beginPath();
+  ctx2d.moveTo(0, H / 2);
+  ctx2d.lineTo(W, H / 2);
+  ctx2d.stroke();
+
+  // 현재 재생 위치 인디케이터
+  const seekBar = document.getElementById('seek-bar');
+  if (seekBar && mixer.songDuration > 0) {
+    const pct = mixer.getCurrentTime() / mixer.songDuration;
+    const x   = pct * W;
+    ctx2d.strokeStyle = '#ff8c1a';
+    ctx2d.lineWidth   = 2 * window.devicePixelRatio;
+    ctx2d.beginPath();
+    ctx2d.moveTo(x, 0);
+    ctx2d.lineTo(x, H);
+    ctx2d.stroke();
+  }
+};
+
+window.addEventListener('resize', () => {
+  if (UI.waveformCtx) UI.initWaveform();
+});
 
 /* 그룹 자동 추론 (파일명 기반) */
 UI.inferGroup = function(name) {

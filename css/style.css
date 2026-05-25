@@ -181,12 +181,23 @@ main { padding: 12px; max-width: 1600px; margin: 0 auto; }
 
 /* 그룹 컬러 바 */
 .ch-group-bar { height: 3px; margin-bottom: 2px; border-radius: 1px; }
+.ch-group-pastor      { background: #f59e0b; }  /* 압범 - 목사님 */
+.ch-group-leader      { background: #ff8c1a; }  /* 오렌지 - 리더 */
+.ch-group-vocal_left  { background: #f87171; }  /* 코랄 - 좌싱어 */
+.ch-group-vocal_right { background: #c084fc; }  /* 퍼플 - 우싱어 */
 .ch-group-vocal  { background: #ff5e5e; }
 .ch-group-drums  { background: #5e8bff; }
-.ch-group-bass   { background: #5e8bff; }
+.ch-group-bass   { background: #3b82f6; }
 .ch-group-guitar { background: #5ec98b; }
 .ch-group-keys   { background: #b85eff; }
 .ch-group-other  { background: #888; }
+
+/* 그룹별 CH 이름 색상 */
+.channel-strip[data-group="pastor"]      .ch-name { color: #f59e0b; }
+.channel-strip[data-group="leader"]      .ch-name { color: #ff8c1a; }
+.channel-strip[data-group="vocal_left"]  .ch-name { color: #f87171; }
+.channel-strip[data-group="vocal_right"] .ch-name { color: #c084fc; }
+.channel-strip.mine .ch-name { color: var(--accent) !important; }
 
 /* PAN */
 .ch-pan { display: flex; flex-direction: column; align-items: center; gap: 1px; }

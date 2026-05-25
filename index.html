@@ -66,6 +66,9 @@
         </div>
       </div>
 
+      <!-- 파형 시각화 -->
+      <canvas id="waveform-canvas" height="48" style="width:100%;display:block;background:#0a0a0c;margin-bottom:2px;"></canvas>
+
       <!-- 시크바 -->
       <div class="seek-row">
         <input type="range" id="seek-bar" value="0" min="0" max="1000" step="1">
@@ -74,12 +77,15 @@
       <!-- 프리셋 (Scene 버튼) -->
       <div class="scene-bar">
         <div class="scene-label">SCENES</div>
-        <button data-preset="all"       class="scene-btn active">ALL</button>
-        <button data-preset="me_solo"   class="scene-btn">SOLO ME</button>
-        <button data-preset="me_full"   class="scene-btn">ME + BAND</button>
-        <button data-preset="me_rhythm" class="scene-btn">ME + RHYTHM</button>
-        <button data-preset="me_keys"   class="scene-btn">ME + KEYS</button>
-        <button data-preset="me_minus"  class="scene-btn">MINUS ME</button>
+        <button data-preset="all"          class="scene-btn active">ALL</button>
+        <button data-preset="me_solo"      class="scene-btn">SOLO ME</button>
+        <button data-preset="me_full"      class="scene-btn">ME + BAND</button>
+        <button data-preset="singers"      class="scene-btn">리더+싱어</button>
+        <button data-preset="singers_only" class="scene-btn">좌우싱어만</button>
+        <button data-preset="instruments"  class="scene-btn">악기만</button>
+        <button data-preset="me_rhythm"    class="scene-btn">ME+RHYTHM</button>
+        <button data-preset="me_keys"      class="scene-btn">ME+KEYS</button>
+        <button data-preset="me_minus"     class="scene-btn">MINUS ME</button>
       </div>
 
       <!-- 채널 스트립 영역 -->

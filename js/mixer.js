@@ -108,10 +108,14 @@ class WorshipMixer {
     dryGain.gain.value = 1.0;
     wetGain.gain.value = 0.0;
 
+    // songs.json pan 초기값 적용 (L/R 스테레오 마이크)
+    const initPan = (typeof info.pan === 'number') ? info.pan : 0;
+    panner.pan.value = initPan;
+
     this.tracks.push({
       buffer, gain, panner, dryGain, wetGain, reverb, analyser,
       info, source: null,
-      volumeDb: 0, reverbAmt: 0, pan: 0, muted: false, solo: false,
+      volumeDb: 0, reverbAmt: 0, pan: initPan, muted: false, solo: false,
     });
 
     if (onProgress) onProgress();
@@ -250,8 +254,11 @@ class WorshipMixer {
         case 'me_full':   muted = false; db = isMine ? 3 : -6; break;
         case 'me_rhythm': muted = !(isMine || ['drums','bass'].includes(group)); db = isMine ? 2 : -3; break;
         case 'me_keys':   muted = !(isMine || ['keys','synth'].includes(group)); db = isMine ? 2 : -3; break;
-        case 'me_minus':  muted = isMine; db = 0; break;
-        default:          muted = false; db = 0;
+        case 'me_minus':    muted = isMine; db = 0; break;
+        case 'singers':     muted = !['leader','vocal_left','vocal_right'].includes(group); db = 0; break;
+        case 'singers_only':muted = !['vocal_left','vocal_right'].includes(group); db = 0; break;
+        case 'instruments': muted = !['keys','bass','guitar','drums'].includes(group); db = 0; break;
+        default:            muted = false; db = 0;
       }
       t.volumeDb = db; t.muted = muted;
       this._applyGain(i);

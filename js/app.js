@@ -70,6 +70,7 @@ async function loadSong(idx) {
   // UI 구성
   UI.renderMyPartSelector(currentSong.tracks);
   UI.renderChannelStrips(currentSong.tracks, mixer);
+  UI.initWaveform();
   UI.showLoading(false);
   UI.setTransportState('ready');
 
@@ -234,8 +235,9 @@ function bindGlobalEvents() {
 function startUpdateLoop() {
   stopUpdateLoop();
   updateTimer = setInterval(() => {
-    // 미터
+    // 미터 + 파형
     UI.updateMeters(mixer);
+    UI.drawWaveform(mixer);
 
     if (!mixer.isPlaying) return;
 
