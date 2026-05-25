@@ -224,11 +224,11 @@ main { padding: 12px; max-width: 1600px; margin: 0 auto; }
 }
 .my-vis-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  aspect-ratio: 4 / 3;
+  grid-template-columns: 2fr 1fr 1fr; /* 스펙트럼 널직하게 */
+  grid-template-rows: 1fr;
+  height: 90px;  /* 콤팟하게 */
   gap: 3px;
-  padding: 6px;
+  padding: 4px 6px 6px;
   background: var(--bg-main);
 }
 .my-vis-body.hidden-body { display: none; }

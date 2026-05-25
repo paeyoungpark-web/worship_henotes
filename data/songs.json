@@ -8,20 +8,6 @@
     "end": 846,
     "tracks": [
       {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
-      {
         "ch": 3,
         "name": "박재우 (리더)",
         "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
@@ -111,20 +97,6 @@
     "start": 846,
     "end": 1070,
     "tracks": [
-      {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
       {
         "ch": 3,
         "name": "박재우 (리더)",
@@ -216,20 +188,6 @@
     "end": 1243,
     "tracks": [
       {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
-      {
         "ch": 3,
         "name": "박재우 (리더)",
         "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
@@ -319,20 +277,6 @@
     "start": 1243,
     "end": 1411,
     "tracks": [
-      {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
       {
         "ch": 3,
         "name": "박재우 (리더)",
@@ -424,20 +368,6 @@
     "end": 1635,
     "tracks": [
       {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
-      {
         "ch": 3,
         "name": "박재우 (리더)",
         "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
@@ -527,20 +457,6 @@
     "start": 1635,
     "end": 1690,
     "tracks": [
-      {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
       {
         "ch": 3,
         "name": "박재우 (리더)",
@@ -632,20 +548,6 @@
     "end": 1987,
     "tracks": [
       {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
-      {
         "ch": 3,
         "name": "박재우 (리더)",
         "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/박재우목사님_bip.mp3",
@@ -735,20 +637,6 @@
     "start": 1987,
     "end": null,
     "tracks": [
-      {
-        "ch": 1,
-        "name": "목사님 L",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사_bip.mp3",
-        "group": "pastor",
-        "pan": -0.3
-      },
-      {
-        "ch": 2,
-        "name": "목사님 R",
-        "file": "https://pub-02511af5429b430fbe859693c59e7c25.r2.dev/song01/목사2_bip.mp3",
-        "group": "pastor",
-        "pan": 0.3
-      },
       {
         "ch": 3,
         "name": "박재우 (리더)",

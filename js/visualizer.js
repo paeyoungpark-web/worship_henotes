@@ -4,8 +4,7 @@
  * 1. 🎵 스펙트럼 분석기 (FFT 막대 그래프)
  * 2. 📊 VU 피크홀드 미터
  * 3. 🎨 채널 발광 (Glow Pulse)
- * 4. 🌊 Three.js 3D 파형
- * 5. 🎤 MY CH 클로즈업 대형 VU 미터
+ * 4. 🎤 MY CH 클로즈업 대형 VU 미터
  */
 class WorshipVisualizer {
   constructor() {
@@ -15,13 +14,6 @@ class WorshipVisualizer {
     this.peakTimers   = [];       // 피크 감쇠 타이머
     this.masterPeak   = 0;
     this.masterPeakTimer = null;
-
-    // Three.js
-    this.three = {
-      scene: null, camera: null, renderer: null,
-      line: null, points: null, animId: null,
-      ready: false,
-    };
 
     // 캔버스 컨텍스트
     this.specCtx    = null;
@@ -42,7 +34,6 @@ class WorshipVisualizer {
 
     if (idx < 0) {
       panel.classList.add('hidden');
-      this._destroyThree();
       return;
     }
 
@@ -64,8 +55,6 @@ class WorshipVisualizer {
       this._initCanvas('large-vu-canvas',c => this.largeVuCtx = c);
     });
 
-    // Three.js 초기화
-    this._initThree();
   }
 
   _initCanvas(id, setter) {
@@ -334,132 +323,7 @@ class WorshipVisualizer {
     });
   }
 
-  /* ══════════════════════════════════════════
-     🌊 Three.js 3D 파형
-  ══════════════════════════════════════════ */
-  _initThree() {
-    if (!window.THREE) {
-      console.warn('Three.js 없음, 3D 파형 건너뜀');
-      return;
-    }
-    const container = document.getElementById('three-container');
-    if (!container) return;
-
-    // 이전 씬 정리
-    this._destroyThree();
-
-    const W = container.offsetWidth;
-    const H = container.offsetHeight;
-
-    // Scene
-    const scene    = new THREE.Scene();
-    const camera   = new THREE.PerspectiveCamera(60, W / H, 0.1, 100);
-    camera.position.set(0, 1.5, 3.5);
-    camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x0a0a0c, 1);
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
-
-    // 배경 그리드
-    const grid = new THREE.GridHelper(10, 20, 0x2e3038, 0x1a1c22);
-    grid.position.y = -0.8;
-    scene.add(grid);
-
-    // 파형 라인 (1024 포인트)
-    const N = 512;
-    const positions = new Float32Array(N * 3);
-    const geometry  = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    // 오렌지 라인
-    const material = new THREE.LineBasicMaterial({
-      color: 0xff8c1a,
-      linewidth: 2,
-    });
-    const line = new THREE.Line(geometry, material);
-    scene.add(line);
-
-    // 이력 리본 (이전 프레임들을 뒤로 이동)
-    const HISTORY = 30;
-    const ribbonGeo  = new THREE.BufferGeometry();
-    const ribbonPos  = new Float32Array(N * HISTORY * 3);
-    ribbonGeo.setAttribute('position', new THREE.BufferAttribute(ribbonPos, 3));
-    const ribbonMat  = new THREE.LineBasicMaterial({ color: 0xff8c1a, transparent: true, opacity: 0.15 });
-    this.three.historyLines = [];
-    this.three.historyData  = [];
-
-    // 파티클 (음악 반응)
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePos = new Float32Array(200 * 3);
-    for (let i = 0; i < 200; i++) {
-      particlePos[i*3]   = (Math.random() - 0.5) * 8;
-      particlePos[i*3+1] = (Math.random() - 0.5) * 4;
-      particlePos[i*3+2] = (Math.random() - 0.5) * 4 - 1;
-    }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0xff8c1a, size: 0.04, transparent: true, opacity: 0.4 });
-    const particles   = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    this.three = { scene, camera, renderer, line, geometry, particles, particleGeo, ready: true, animId: null, frame: 0 };
-
-    this._animateThree();
-  }
-
-  _animateThree() {
-    if (!this.three.ready) return;
-    const t   = this.mixer.tracks[this.myIdx];
-    const N   = 512;
-    this.three.frame = (this.three.frame || 0) + 1;
-
-    if (t && this.mixer.isPlaying) {
-      t.analyser.fftSize = 1024;
-      const data = new Uint8Array(t.analyser.fftSize);
-      t.analyser.getByteTimeDomainData(data);
-
-      const pos = this.three.geometry.attributes.position;
-      for (let i = 0; i < N; i++) {
-        const x = (i / (N - 1)) * 4 - 2;
-        const y = ((data[i * 2] / 128.0) - 1) * 1.2;
-        pos.setXYZ(i, x, y, 0);
-      }
-      pos.needsUpdate = true;
-
-      // 파티클 반응 (레벨에 따라 흔들림)
-      const level = this.mixer.getTrackLevel(this.myIdx);
-      const pPos  = this.three.particleGeo.attributes.position;
-      for (let i = 0; i < 200; i++) {
-        const px = pPos.getX(i) + (Math.random() - 0.5) * level * 0.05;
-        const py = pPos.getY(i) + (Math.random() - 0.5) * level * 0.05;
-        pPos.setXY(i, px * 0.998, py * 0.998);
-      }
-      pPos.needsUpdate = true;
-      this.three.particles.material.opacity = 0.2 + level * 0.6;
-    }
-
-    // 카메라 천천히 회전
-    const angle = this.three.frame * 0.003;
-    this.three.camera.position.x = Math.sin(angle) * 3.5;
-    this.three.camera.position.z = Math.cos(angle) * 3.5;
-    this.three.camera.lookAt(0, 0, 0);
-
-    this.three.renderer.render(this.three.scene, this.three.camera);
-    this.three.animId = requestAnimationFrame(() => this._animateThree());
-  }
-
-  _destroyThree() {
-    if (this.three.animId) { cancelAnimationFrame(this.three.animId); }
-    if (this.three.renderer) {
-      this.three.renderer.dispose();
-      const c = this.three.renderer.domElement;
-      if (c.parentNode) c.parentNode.removeChild(c);
-    }
-    this.three = { scene:null, camera:null, renderer:null, line:null, geometry:null, particles:null, particleGeo:null, ready:false, animId:null, frame:0 };
-  }
+  
 
   /* ══════════════════════════════════════════
      메인 업데이트 (app.js 루프에서 호출)
@@ -477,7 +341,6 @@ class WorshipVisualizer {
     this._drawSpectrum();
     this._drawVU();
     this._drawLargeVU();
-    // Three.js는 자체 rAF 루프로 동작 (별도 호출 불필요)
   }
 
   /* 마스터 파형 (상단 캔버스) */

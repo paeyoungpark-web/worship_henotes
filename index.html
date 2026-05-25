@@ -110,22 +110,18 @@
           <span class="my-vis-badge">MY CHANNEL</span>
           <button id="vis-toggle-btn" class="vis-toggle active" title="시각화 ON/OFF">👁 ON</button>
         </div>
-        <!-- 2\xd72 그리드 (4:3 비율) -->
+        <!-- 1행 3칸 레이아웃 -->
         <div class="my-vis-body">
           <div class="vis-cell">
             <div class="vis-label">🎵 SPECTRUM</div>
             <canvas id="spec-canvas" class="vis-canvas"></canvas>
           </div>
           <div class="vis-cell">
-            <div class="vis-label">🌊 3D WAVE</div>
-            <div id="three-container" class="vis-canvas"></div>
-          </div>
-          <div class="vis-cell">
-            <div class="vis-label">📊 VU PEAK HOLD</div>
+            <div class="vis-label">📊 VU PEAK</div>
             <canvas id="vu-canvas" class="vis-canvas"></canvas>
           </div>
           <div class="vis-cell">
-            <div class="vis-label">🎤 CLOSE-UP VU</div>
+            <div class="vis-label">🎤 LEVEL</div>
             <canvas id="large-vu-canvas" class="vis-canvas"></canvas>
           </div>
         </div>
@@ -227,7 +223,6 @@
     </section>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/mixer.js"></script>
   <script src="js/visualizer.js"></script>
   <script src="js/ui.js"></script>
