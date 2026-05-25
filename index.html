@@ -2,93 +2,162 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>찬양팀 실황 모니터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>찬양팀 실황 모니터 · M32 Style</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <header>
-    <h1>🎵 찬양팀 실황 모니터</h1>
-    <p class="hint">🎧 헤드폰 권장 · 📶 와이파이 권장</p>
+<body class="m32-theme">
+
+  <!-- 상단 헤더 -->
+  <header class="console-header">
+    <div class="brand">
+      <span class="logo">◉</span>
+      <span class="brand-name">WORSHIP MONITOR</span>
+      <span class="brand-sub">M32 STYLE</span>
+    </div>
+    <div class="status-bar">
+      <span class="status-led" id="status-led"></span>
+      <span id="status-text">READY</span>
+    </div>
   </header>
 
   <main>
-    <!-- ── 곡 목록 뷰 ── -->
+    <!-- 곡 목록 뷰 -->
     <section id="view-list" class="view">
-      <h2>곡 목록</h2>
+      <div class="section-title">▸ SCENE LIST</div>
       <div id="song-list"></div>
     </section>
 
-    <!-- ── 플레이어 뷰 ── -->
+    <!-- 플레이어 뷰 -->
     <section id="view-player" class="view hidden">
 
-      <button id="back-btn" class="back-btn">← 목록으로</button>
-
-      <!-- 곡 정보 -->
-      <div class="player-header">
-        <div class="player-header-icon">🎵</div>
-        <div class="player-header-info">
-          <div id="song-title"></div>
-          <div id="song-date"></div>
+      <div class="player-top">
+        <button id="back-btn" class="btn-back">◀ SCENES</button>
+        <div class="song-info">
+          <div id="song-title" class="song-title-display">—</div>
+          <div id="song-date" class="song-date-display">—</div>
+        </div>
+        <div class="my-part-box">
+          <label>MY CH</label>
+          <select id="my-part-select"></select>
         </div>
       </div>
 
-      <!-- 내 파트 -->
-      <div class="my-part">
-        <label for="my-part-select">🎤 내 파트</label>
-        <select id="my-part-select"></select>
-      </div>
-
-      <!-- 트랜스포트 (sticky) -->
-      <div class="transport sticky">
-        <div class="transport-controls">
-          <button id="play-btn" class="transport-btn">▶ 재생</button>
-          <button id="pause-btn" class="transport-btn">⏸</button>
-          <button id="stop-btn" class="transport-btn">⏹</button>
+      <!-- 트랜스포트 -->
+      <div class="transport-bar">
+        <button id="play-btn" class="tr-btn tr-play" title="재생">
+          <span class="tr-icon">▶</span><span class="tr-label">PLAY</span>
+        </button>
+        <button id="pause-btn" class="tr-btn tr-pause" title="일시정지" disabled>
+          <span class="tr-icon">❚❚</span><span class="tr-label">PAUSE</span>
+        </button>
+        <button id="stop-btn" class="tr-btn tr-stop" title="정지" disabled>
+          <span class="tr-icon">■</span><span class="tr-label">STOP</span>
+        </button>
+        <div class="time-display">
+          <span id="time-current">0:00.0</span>
+          <span class="time-sep">/</span>
+          <span id="time-total">0:00.0</span>
         </div>
-        <span id="time-display">0:00 / 0:00</span>
+        <div class="loop-cluster">
+          <button id="loop-a-btn" class="tr-btn-sm">SET A</button>
+          <button id="loop-b-btn" class="tr-btn-sm">SET B</button>
+          <button id="loop-toggle-btn" class="tr-btn-sm">LOOP OFF</button>
+        </div>
       </div>
 
       <!-- 시크바 -->
-      <div class="seekbar-wrap">
+      <div class="seek-row">
         <input type="range" id="seek-bar" value="0" min="0" max="1000" step="1">
       </div>
 
-      <!-- 루프 -->
-      <div class="loop-controls">
-        <button id="loop-a-btn" class="loop-btn">🔁 A 지점</button>
-        <button id="loop-b-btn" class="loop-btn">🔁 B 지점</button>
-        <button id="loop-toggle-btn" class="loop-btn">구간반복 OFF</button>
+      <!-- 프리셋 (Scene 버튼) -->
+      <div class="scene-bar">
+        <div class="scene-label">SCENES</div>
+        <button data-preset="all"       class="scene-btn active">ALL</button>
+        <button data-preset="me_solo"   class="scene-btn">SOLO ME</button>
+        <button data-preset="me_full"   class="scene-btn">ME + BAND</button>
+        <button data-preset="me_rhythm" class="scene-btn">ME + RHYTHM</button>
+        <button data-preset="me_keys"   class="scene-btn">ME + KEYS</button>
+        <button data-preset="me_minus"  class="scene-btn">MINUS ME</button>
       </div>
 
-      <!-- 프리셋 -->
-      <div class="presets">
-        <div class="presets-title">프리셋</div>
-        <div class="preset-buttons">
-          <button class="preset-btn active" data-preset="all">전체</button>
-          <button class="preset-btn" data-preset="me_solo">내 파트만</button>
-          <button class="preset-btn" data-preset="me_full">내 파트 + 풀밴드</button>
-          <button class="preset-btn" data-preset="me_rhythm">내 파트 + 리듬</button>
-          <button class="preset-btn" data-preset="me_keys">내 파트 + 키</button>
-          <button class="preset-btn" data-preset="me_minus">내 파트 빼고 (MR)</button>
+      <!-- 채널 스트립 영역 -->
+      <div class="console-wrap">
+        <div id="channel-strips" class="channel-strips"></div>
+        <!-- 마스터 스트립 -->
+        <div class="master-strip">
+          <div class="ch-header master-header">MASTER</div>
+          <div class="ch-meter-frame">
+            <div class="ch-meter" id="master-meter"></div>
+          </div>
+          <div class="ch-fader-frame">
+            <input type="range" class="fader master-fader" id="master-fader"
+              min="-60" max="6" step="0.5" value="0" orient="vertical">
+            <div class="fader-scale">
+              <span>+6</span><span>0</span><span>-10</span><span>-20</span><span>-40</span><span>∞</span>
+            </div>
+          </div>
+          <div class="ch-db-readout" id="master-db">0.0 dB</div>
         </div>
       </div>
 
-      <!-- 트랙 그룹 -->
-      <div id="track-groups"></div>
-
-      <!-- 액션 버튼 -->
-      <div class="actions">
-        <button id="copy-mix-btn" class="action-btn">📋 현재 믹스값 복사</button>
-        <button id="feedback-btn" class="action-btn primary">💬 피드백 남기기</button>
+      <!-- 하단 액션 -->
+      <div class="action-bar">
+        <button id="copy-mix-btn" class="action-btn">📋 EXPORT MIX</button>
+        <button id="feedback-btn" class="action-btn">💬 FEEDBACK</button>
+        <button id="info-btn"     class="action-btn">ⓘ HELP</button>
       </div>
 
       <!-- 로딩 오버레이 -->
-      <div id="loading" class="loading hidden">
-        <div class="loading-icon">🎵</div>
-        <p>로딩 중... <span id="loading-progress">0</span>%</p>
-        <div class="loading-bar-wrap">
-          <div class="loading-bar" style="width:0%"></div>
+      <div id="loading" class="loading-overlay hidden">
+        <div class="loading-box">
+          <div class="loading-led"></div>
+          <div class="loading-text">LOADING SCENE...</div>
+          <div class="loading-progress-bar">
+            <div class="loading-progress-fill" id="loading-fill"></div>
+          </div>
+          <div class="loading-percent"><span id="loading-progress">0</span>%</div>
+        </div>
+      </div>
+
+      <!-- 도움말 모달 -->
+      <div id="help-modal" class="modal hidden">
+        <div class="modal-content">
+          <button class="modal-close" id="help-close">✕</button>
+          <h2>🎛 컨트롤 가이드</h2>
+          <div class="help-section">
+            <h3>🎚 페이더 (FADER)</h3>
+            <p>각 채널의 볼륨을 dB 단위로 조절합니다. 0 dB가 기본값이며, 위로 올리면 크게(+6 dB까지), 아래로 내리면 작게 들립니다.</p>
+          </div>
+          <div class="help-section">
+            <h3>🔇 MUTE (M)</h3>
+            <p>해당 채널을 일시적으로 끕니다. 페이더 값은 유지되며, 해제 시 원래 볼륨으로 돌아옵니다.</p>
+          </div>
+          <div class="help-section">
+            <h3>🟡 SOLO (S)</h3>
+            <p>이 채널만 듣고 나머지는 끕니다. 여러 채널을 SOLO로 켜면 그 채널들끼리만 들립니다.</p>
+          </div>
+          <div class="help-section">
+            <h3>🌫 REVERB (REV)</h3>
+            <p>가상의 공간 울림을 추가합니다. 보컬 15~25%, 악기 5~15% 권장.</p>
+          </div>
+          <div class="help-section">
+            <h3>↔ PAN</h3>
+            <p>좌(L) / 우(R) 스테레오 위치 조절. C(가운데)가 기본.</p>
+          </div>
+          <div class="help-section">
+            <h3>📍 SCENES (프리셋)</h3>
+            <p>"MY CH"에서 자기 채널을 먼저 선택한 후 사용하세요.</p>
+          </div>
+          <div class="help-section">
+            <h3>🔁 LOOP A-B</h3>
+            <p>SET A → SET B 순서로 구간 지정 후 LOOP ON 으로 무한 반복. 어려운 구간 연습에 유용.</p>
+          </div>
+          <div class="help-section">
+            <h3>📤 EXPORT MIX</h3>
+            <p>현재 모든 채널의 볼륨/리버브/팬/뮤트 상태를 텍스트로 클립보드에 복사. 믹스 담당자에게 제안할 때 사용.</p>
+          </div>
         </div>
       </div>
 
