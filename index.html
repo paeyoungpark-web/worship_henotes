@@ -81,27 +81,24 @@
           <span class="my-vis-name" id="my-vis-name"></span>
           <span class="my-vis-badge">MY CHANNEL</span>
         </div>
+        <!-- 2\xd72 그리드 (4:3 비율) -->
         <div class="my-vis-body">
-          <!-- 스펙트럼 -->
           <div class="vis-cell">
             <div class="vis-label">🎵 SPECTRUM</div>
             <canvas id="spec-canvas" class="vis-canvas"></canvas>
           </div>
-          <!-- VU 피크홀드 -->
-          <div class="vis-cell vis-cell-narrow">
-            <div class="vis-label">📊 VU PEAK</div>
-            <canvas id="vu-canvas" class="vis-canvas"></canvas>
-          </div>
-          <!-- Three.js 3D 파형 -->
           <div class="vis-cell">
             <div class="vis-label">🌊 3D WAVE</div>
             <div id="three-container" class="vis-canvas"></div>
           </div>
-        </div>
-        <!-- 대형 VU 미터 -->
-        <div class="vis-large-vu">
-          <div class="vis-label">🎤 CLOSE-UP VU METER</div>
-          <canvas id="large-vu-canvas" style="width:100%;height:60px;display:block;"></canvas>
+          <div class="vis-cell">
+            <div class="vis-label">📊 VU PEAK HOLD</div>
+            <canvas id="vu-canvas" class="vis-canvas"></canvas>
+          </div>
+          <div class="vis-cell">
+            <div class="vis-label">🎤 CLOSE-UP VU</div>
+            <canvas id="large-vu-canvas" class="vis-canvas"></canvas>
+          </div>
         </div>
       </div>
 

@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   bindGlobalEvents();
+  bindKeyboard();
   UI.setTransportState('ready');
 });
 
@@ -266,6 +267,91 @@ function startUpdateLoop() {
 
 function stopUpdateLoop() {
   if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
+}
+
+/* ── 키보드 네비게이션 ── */
+function bindKeyboard() {
+  document.addEventListener('keydown', e => {
+    // 입력 필드에 포커스 시 무시
+    if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+    switch (e.key) {
+      case 'ArrowRight': {
+        // 다음 곡
+        if (!currentSong || !songs.length) break;
+        const idx  = songs.indexOf(currentSong);
+        const next = songs[idx + 1];
+        if (next) {
+          loadSong(songs.indexOf(next));
+          UI.toast(`▶ ${next.title}`);
+        } else {
+          UI.toast('⚠ 마지막 곡입니다');
+        }
+        e.preventDefault();
+        break;
+      }
+      case 'ArrowLeft': {
+        // 이전 곡
+        if (!currentSong || !songs.length) break;
+        const idx  = songs.indexOf(currentSong);
+        const prev = songs[idx - 1];
+        if (prev) {
+          loadSong(songs.indexOf(prev));
+          UI.toast(`◀ ${prev.title}`);
+        } else {
+          UI.toast('⚠ 첫 번째 곡입니다');
+        }
+        e.preventDefault();
+        break;
+      }
+      case 'ArrowUp': {
+        // MY CH 볼륨 +1dB
+        if (myPartIdx < 0) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
+        const t = mixer.tracks[myPartIdx];
+        if (!t) break;
+        const newDb = Math.min(t.volumeDb + 1, 6);
+        mixer.setTrackVolumeDb(myPartIdx, newDb);
+        _syncFaderUI(myPartIdx, newDb);
+        UI.toast(`🔊 CH${myPartIdx+1} ${UI.dbToLabel(newDb)} dB`);
+        e.preventDefault();
+        break;
+      }
+      case 'ArrowDown': {
+        // MY CH 볼륨 -1dB
+        if (myPartIdx < 0) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
+        const t = mixer.tracks[myPartIdx];
+        if (!t) break;
+        const newDb = Math.max(t.volumeDb - 1, -60);
+        mixer.setTrackVolumeDb(myPartIdx, newDb);
+        _syncFaderUI(myPartIdx, newDb);
+        UI.toast(`🔉 CH${myPartIdx+1} ${UI.dbToLabel(newDb)} dB`);
+        e.preventDefault();
+        break;
+      }
+      case ' ': {
+        // 스페이스바 = 재생/일시정지
+        if (!mixer.tracks.length) break;
+        if (mixer.isPlaying) {
+          mixer.pause();
+          UI.setTransportState('paused');
+        } else {
+          mixer.play(mixer.pauseTime);
+          UI.setTransportState('playing');
+        }
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+}
+
+function _syncFaderUI(idx, db) {
+  const strip = document.querySelector(`.channel-strip[data-idx="${idx}"]`);
+  if (!strip) return;
+  const fader = strip.querySelector('.fader');
+  const dbOut = strip.querySelector('.ch-db-readout');
+  if (fader) fader.value = db;
+  if (dbOut) dbOut.textContent = UI.dbToLabel(db) + ' dB';
 }
 
 function updateTimeDisplay() {

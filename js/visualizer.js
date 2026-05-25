@@ -57,9 +57,12 @@ class WorshipVisualizer {
     panel.classList.remove('hidden');
 
     // 캔버스 초기화
-    this._initCanvas('spec-canvas',    c => this.specCtx    = c);
-    this._initCanvas('vu-canvas',      c => this.vuCtx      = c);
-    this._initCanvas('large-vu-canvas',c => this.largeVuCtx = c);
+    // rAF 한 텍 들려서 레이아웃 안정화 후 캐버스 설정
+    requestAnimationFrame(() => {
+      this._initCanvas('spec-canvas',    c => this.specCtx    = c);
+      this._initCanvas('vu-canvas',      c => this.vuCtx      = c);
+      this._initCanvas('large-vu-canvas',c => this.largeVuCtx = c);
+    });
 
     // Three.js 초기화
     this._initThree();

@@ -78,6 +78,63 @@ class WorshipMixer {
     return buf;
   }
 
+  /* ══ 악기별 FX 체인 팩토리 ══ */
+  _buildFxChain(group) {
+    switch (group) {
+      case 'keys':
+      case 'synth': return this._makeChorus();
+      case 'bass':  return this._makeBassEQ();
+      case 'guitar':return this._makeGuitarAirEQ();
+      case 'drums': return this._makeDrumRoom();
+      default:      return this._makeRoomReverb();
+    }
+  }
+
+  _makeChorus() {  // 키/신디: 코러스
+    const delay = this.ctx.createDelay(0.05);
+    delay.delayTime.value = 0.022;
+    const lfo = this.ctx.createOscillator();
+    lfo.type = 'sine'; lfo.frequency.value = 0.4;
+    const lfoG = this.ctx.createGain();
+    lfoG.gain.value = 0.007;
+    lfo.connect(lfoG); lfoG.connect(delay.delayTime); lfo.start();
+    return { input: delay, output: delay, nodes: [lfo, lfoG, delay], type: 'CHORUS' };
+  }
+
+  _makeBassEQ() {  // 베이스: HPF + LPF + 100Hz 부스트
+    const hpf = this.ctx.createBiquadFilter();
+    hpf.type = 'highpass'; hpf.frequency.value = 40; hpf.Q.value = 0.5;
+    const lpf = this.ctx.createBiquadFilter();
+    lpf.type = 'lowpass'; lpf.frequency.value = 700; lpf.Q.value = 0.7;
+    const boost = this.ctx.createBiquadFilter();
+    boost.type = 'peaking'; boost.frequency.value = 100; boost.gain.value = 3; boost.Q.value = 1;
+    hpf.connect(lpf); lpf.connect(boost);
+    return { input: hpf, output: boost, nodes: [hpf, lpf, boost], type: 'BASS EQ' };
+  }
+
+  _makeGuitarAirEQ() {  // 어쿠스틱: HPF + 프레젠스 + Air
+    const hpf = this.ctx.createBiquadFilter();
+    hpf.type = 'highpass'; hpf.frequency.value = 90; hpf.Q.value = 0.7;
+    const presence = this.ctx.createBiquadFilter();
+    presence.type = 'peaking'; presence.frequency.value = 3500; presence.gain.value = 2; presence.Q.value = 1.2;
+    const air = this.ctx.createBiquadFilter();
+    air.type = 'highshelf'; air.frequency.value = 10000; air.gain.value = 2.5;
+    hpf.connect(presence); presence.connect(air);
+    return { input: hpf, output: air, nodes: [hpf, presence, air], type: 'AIR EQ' };
+  }
+
+  _makeDrumRoom() {  // 드럼: 타이트 룸 (0.35초)
+    const rev = this.ctx.createConvolver();
+    rev.buffer = this._makeSyntheticIR(0.35, 0.95);
+    return { input: rev, output: rev, nodes: [rev], type: 'ROOM' };
+  }
+
+  _makeRoomReverb() {  // 기본 리버브
+    const rev = this.ctx.createConvolver();
+    if (this.reverbBuffer) rev.buffer = this.reverbBuffer;
+    return { input: rev, output: rev, nodes: [rev], type: 'REV' };
+  }
+
   /* ── 트랙 로딩 ── */
   async loadTrack(info, onProgress) {
     const res = await fetch(info.file);
@@ -91,30 +148,33 @@ class WorshipMixer {
     const panner   = this.ctx.createStereoPanner();
     const dryGain  = this.ctx.createGain();
     const wetGain  = this.ctx.createGain();
-    const reverb   = this.ctx.createConvolver();
     const analyser = this.ctx.createAnalyser();
     analyser.fftSize = 256;
-
-    if (this.reverbBuffer) reverb.buffer = this.reverbBuffer;
 
     gain.connect(panner);
     panner.connect(analyser);
     analyser.connect(dryGain);
     dryGain.connect(this.masterGain);
+
+    // 악기별 이펜트 FX 체인 (wetGain 다음에 연결)
+    const group = info.group || 'other';
+    const fx    = this._buildFxChain(group);
     panner.connect(wetGain);
-    wetGain.connect(reverb);
-    reverb.connect(this.masterGain);
+    wetGain.connect(fx.input);
+    fx.output.connect(this.masterGain);
 
     dryGain.gain.value = 1.0;
     wetGain.gain.value = 0.0;
 
-    // songs.json pan 초기값 적용 (L/R 스테레오 마이크)
+    // songs.json pan 초기값
     const initPan = (typeof info.pan === 'number') ? info.pan : 0;
     panner.pan.value = initPan;
 
     this.tracks.push({
-      buffer, gain, panner, dryGain, wetGain, reverb, analyser,
-      info, source: null,
+      buffer, gain, panner, dryGain, wetGain,
+      fxInput: fx.input, fxOutput: fx.output,
+      fxNodes: fx.nodes, fxType: fx.type,
+      analyser, info, source: null,
       volumeDb: 0, reverbAmt: 0, pan: initPan, muted: false, solo: false,
     });
 
@@ -144,17 +204,17 @@ class WorshipMixer {
     if (this.isPlaying || this.tracks.length === 0) return;
     if (this.ctx.state === 'suspended') this.ctx.resume();
 
-    const AHEAD     = 0.05; // 50ms 선스케줄
-    const target    = this.ctx.currentTime + AHEAD;
-    const bufOffset = this.songStart + Math.max(0, Math.min(relOffset, this.songDuration));
+    const SCHEDULE_AHEAD = 0.1; // 100ms 여유 — 핵심
+    const targetStart = this.ctx.currentTime + SCHEDULE_AHEAD;
+    const bufOffset   = this.songStart + Math.max(0, Math.min(relOffset, this.songDuration));
 
-    this.startTime = target - relOffset; // ctx 기준으로 역산
+    this.startTime = targetStart - relOffset;
 
     this.tracks.forEach(t => {
       const src = this.ctx.createBufferSource();
       src.buffer = t.buffer;
       src.connect(t.gain);
-      src.start(target, bufOffset); // 동일한 target 시각 → 완벽한 싱크
+      src.start(targetStart, bufOffset); // 모든 트랙이 동일한 targetStart를 받음
       t.source = src;
     });
     this.isPlaying = true;

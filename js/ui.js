@@ -69,7 +69,16 @@ const UI = {
       strip.className = 'channel-strip';
       strip.dataset.idx = idx;
       strip.dataset.group = t.group || 'other';
-      const chNum  = t.ch ? t.ch.toString().padStart(2, '0') : (idx + 1).toString().padStart(2, '0');
+      const chNum   = t.ch ? t.ch.toString().padStart(2, '0') : (idx + 1).toString().padStart(2, '0');
+      // 그룹별 FX 라벨 + 툴팁
+      const fxMap = {
+        keys: ['CHORUS', '코러스 주기에 따라 딱 열리는 패드 사운드'],
+        synth:['CHORUS', '코러스 (신디 더블링 에펜트)'],
+        bass: ['BASS EQ','HPF+LPF+100Hz 부스트 — 빼를한 저음'],
+        guitar:['AIR EQ', 'HPF+3.5kHz 프레젠스+10kHz 에어 에퀴엄라이저'],
+        drums: ['ROOM', '타이트 0.35초 룸 리버브'],
+      };
+      const [fxLabel, fxTitle] = fxMap[t.group] || ['REV', '주변 공간감 (REVERB)'];
       const tName  = t.name || t.file.split('/').pop().replace(/\.[^.]+$/, '');
 
       strip.innerHTML = `
@@ -83,8 +92,8 @@ const UI = {
           <div class="ch-pan-readout">C</div>
         </div>
 
-        <div class="ch-rev" title="잔향 추가 (REVERB) — 보컬 15~25% 권장">
-          <div class="ch-rev-label">REV</div>
+        <div class="ch-rev" title="${fxTitle}">
+          <div class="ch-rev-label">${fxLabel}</div>
           <input type="range" class="ch-rev-slider" min="0" max="1" step="0.01" value="0">
           <div class="ch-rev-readout">0%</div>
         </div>
