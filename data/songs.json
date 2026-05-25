@@ -1,0 +1,19 @@
+[
+  {
+    "id": "song01",
+    "title": "주 보좌 앞에 나아갈 때",
+    "date": "2026-05-19",
+    "duration": "5:23",
+    "tracks": [
+      { "name": "리드보컬",   "file": "audio/song01/vocal_lead.mp3",  "group": "vocal"  },
+      { "name": "화음 1",     "file": "audio/song01/vocal_harm1.mp3", "group": "vocal"  },
+      { "name": "화음 2",     "file": "audio/song01/vocal_harm2.mp3", "group": "vocal"  },
+      { "name": "드럼",       "file": "audio/song01/drums.mp3",       "group": "drums"  },
+      { "name": "베이스",     "file": "audio/song01/bass.mp3",        "group": "bass"   },
+      { "name": "일렉기타",   "file": "audio/song01/eg.mp3",          "group": "guitar" },
+      { "name": "어쿠스틱",   "file": "audio/song01/ag.mp3",          "group": "guitar" },
+      { "name": "건반",       "file": "audio/song01/keys.mp3",        "group": "keys"   },
+      { "name": "신디",       "file": "audio/song01/synth.mp3",       "group": "keys"   }
+    ]
+  }
+]

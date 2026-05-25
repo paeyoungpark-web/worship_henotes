@@ -1,0 +1,177 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  line-height: 1.5;
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 20px 0;
+}
+header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+header .hint { font-size: 0.85rem; color: #666; }
+
+.hidden { display: none !important; }
+
+.view { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── 곡 목록 ── */
+#song-list { display: flex; flex-direction: column; gap: 12px; }
+.song-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.song-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.song-card .title { font-weight: 600; font-size: 1.05rem; margin-bottom: 4px; }
+.song-card .meta { font-size: 0.85rem; color: #777; }
+
+/* ── 플레이어 ── */
+.back-btn {
+  background: none; border: none; color: #4a6cf7;
+  font-size: 0.95rem; cursor: pointer; margin-bottom: 16px; padding: 4px 0;
+}
+#song-title { font-size: 1.4rem; margin-bottom: 4px; }
+.meta { color: #777; font-size: 0.9rem; margin-bottom: 20px; }
+
+.my-part {
+  background: #fff; padding: 14px; border-radius: 10px;
+  margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+}
+.my-part select {
+  flex: 1; padding: 8px 12px; border: 1px solid #ddd;
+  border-radius: 8px; font-size: 1rem; background: #fff;
+}
+
+.transport {
+  background: #fff; padding: 12px; border-radius: 10px;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.transport.sticky {
+  position: sticky; top: 8px; z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.transport button {
+  padding: 10px 16px; border: none; border-radius: 8px;
+  background: #4a6cf7; color: #fff; font-size: 0.95rem; cursor: pointer;
+  min-height: 40px;
+}
+.transport button:hover { background: #3b5be0; }
+#time-display { margin-left: auto; font-variant-numeric: tabular-nums; color: #333; }
+
+#seek-bar { width: 100%; margin: 12px 0; height: 32px; cursor: pointer; }
+
+.loop-controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.loop-controls button {
+  flex: 1; padding: 10px; border: 1px solid #ddd; background: #fff;
+  border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+}
+.loop-controls button.active { background: #fef3c7; border-color: #f59e0b; }
+
+/* ── 프리셋 ── */
+.presets { background: #fff; padding: 14px; border-radius: 10px; margin-bottom: 20px; }
+.presets h3 { font-size: 0.95rem; margin-bottom: 10px; color: #555; }
+.preset-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.preset-buttons button {
+  padding: 10px 14px; border: 1px solid #ddd; background: #fff;
+  border-radius: 20px; cursor: pointer; font-size: 0.85rem;
+  min-height: 40px; transition: all 0.15s;
+}
+.preset-buttons button:hover { background: #eef; border-color: #4a6cf7; }
+.preset-buttons button.active { background: #4a6cf7; color: #fff; border-color: #4a6cf7; }
+
+/* ── 트랙 그룹 ── */
+.track-group { background: #fff; padding: 14px; border-radius: 10px; margin-bottom: 12px; }
+.track-group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none; margin-bottom: 10px;
+}
+.track-group-header h3 { font-size: 0.95rem; color: #555; }
+.track-group-header .toggle-icon { font-size: 0.8rem; color: #999; transition: transform 0.2s; }
+.track-group-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+.track-group.vocal .track-group-header h3 { color: #d4660a; }
+.track-group.rhythm .track-group-header h3 { color: #1e3a8a; }
+.track-group.melody .track-group-header h3 { color: #166534; }
+.track-group-body { }
+.track-group-body.collapsed { display: none; }
+
+.track-row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 8px;
+  padding: 10px;
+  background: #f9f9fb;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+  transition: border 0.15s;
+}
+.track-row.mine { border: 2px solid #4a6cf7; background: #eef2ff; }
+.track-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+.track-row .track-info { display: flex; flex-direction: column; gap: 6px; }
+.track-row .track-name { font-size: 0.9rem; font-weight: 500; }
+.track-row .sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.track-row .slider-wrap { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #666; }
+.track-row .slider-wrap input[type="range"] { flex: 1; height: 32px; cursor: pointer; }
+.track-row .value { min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── 하단 버튼 ── */
+.actions { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+.actions button {
+  flex: 1; padding: 14px; border: none; border-radius: 10px;
+  background: #fff; cursor: pointer; font-size: 0.95rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06); min-height: 48px;
+  transition: background 0.15s;
+}
+.actions button:hover { background: #f0f0f3; }
+
+/* ── 로딩 오버레이 ── */
+.loading {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.95); display: flex;
+  align-items: center; justify-content: center; z-index: 100;
+  flex-direction: column; gap: 16px;
+}
+.loading p { font-size: 1.1rem; color: #333; }
+.loading-bar-wrap {
+  width: 200px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;
+}
+.loading-bar { height: 100%; background: #4a6cf7; border-radius: 3px; transition: width 0.3s; }
+
+/* ── 모바일 최적화 ── */
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  header h1 { font-size: 1.3rem; }
+  .track-row .sliders { grid-template-columns: 1fr; }
+  .preset-buttons button { flex: 1 1 calc(50% - 4px); }
+  .transport { gap: 6px; }
+  .transport button { padding: 10px 12px; font-size: 0.9rem; }
+}
+
+/* ── 날짜 헤더 ── */
+.date-header {
+  margin: 20px 0 8px;
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+/* ── 빈 상태 ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+.empty-state p { font-size: 0.95rem; margin-top: 8px; }
