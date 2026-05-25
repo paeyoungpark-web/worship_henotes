@@ -31,6 +31,56 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── PIN 잠금 화면 ── */
+#pin-screen {
+  position: fixed; inset: 0;
+  background: #060608;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+#pin-screen.unlocked { display: none; }
+.pin-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 40px rgba(255,140,26,0.2);
+  padding: 36px 32px;
+  text-align: center;
+  min-width: 280px;
+}
+.pin-logo { color: var(--accent); font-size: 2.4rem; margin-bottom: 8px; }
+.pin-title { color: var(--text-bright); font-size: 1rem; letter-spacing: 3px; margin-bottom: 4px; }
+.pin-sub { color: var(--text-dim); font-size: 0.72rem; margin-bottom: 20px; }
+#pin-dots {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 8px;
+}
+.dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--border-b);
+  background: transparent;
+  transition: all 0.15s;
+}
+.dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.pin-error { color: var(--red); font-size: 0.75rem; margin-bottom: 8px; animation: shake 0.3s ease; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+.pin-pad {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-top: 16px;
+}
+.pin-key {
+  background: var(--bg-strip); border: 1px solid var(--border-b);
+  color: var(--text-bright); font-size: 1.3rem; font-family: inherit;
+  padding: 16px 0; cursor: pointer; border-radius: 4px;
+  transition: all 0.1s;
+}
+.pin-key:hover { background: var(--bg-panel-2); color: var(--accent); border-color: var(--accent); }
+.pin-key:active { transform: scale(0.94); }
+.pin-del { color: var(--text-dim); font-size: 1rem; }
+.pin-ok  { background: var(--accent); color: #000; font-weight: 700; border-color: var(--accent); }
+
 .hidden { display: none !important; }
 
 /* ── 헤더 ── */
@@ -158,15 +208,30 @@ main { padding: 12px; max-width: 1600px; margin: 0 auto; }
   font-size: 0.65rem; font-weight: 700;
   padding: 2px 8px; letter-spacing: 1px;
 }
+/* 시각화 패널 토글 */
+.vis-toggle {
+  margin-left: auto;
+  background: var(--bg-strip); border: 1px solid var(--border-b);
+  color: var(--text-dim); font-family: inherit; font-size: 0.65rem;
+  padding: 3px 8px; cursor: pointer; letter-spacing: 1px; white-space: nowrap;
+}
+.vis-toggle.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+/* 1/4 크기 시각화 패널 */
+.my-vis-panel {
+  max-width: 50%;   /* 폰 폭 절반 */
+  margin-left: auto; /* 우측 정렬 */
+}
 .my-vis-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  aspect-ratio: 4 / 3;   /* 4:3 정사각형 */
+  aspect-ratio: 4 / 3;
   gap: 3px;
   padding: 6px;
   background: var(--bg-main);
 }
+.my-vis-body.hidden-body { display: none; }
 .vis-cell {
   background: #0d0d10;
   border: 1px solid var(--border);

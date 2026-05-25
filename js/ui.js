@@ -52,11 +52,14 @@ const UI = {
 
   /* 내 파트 드롭다운 */
   renderMyPartSelector(tracks) {
-    const sel = document.getElementById('my-part-select');
-    sel.innerHTML = '<option value="-1">— SELECT —</option>' +
-      tracks.map((t, i) =>
-        `<option value="${i}">CH${(i+1).toString().padStart(2,'0')} · ${t.name || t.file.split('/').pop()}</option>`
-      ).join('');
+    const opts = '<option value="-1">— SELECT —</option>' +
+      tracks.map((t, i) => {
+        const ch = t.ch ? t.ch.toString().padStart(2,'0') : (i+1).toString().padStart(2,'0');
+        return `<option value="${i}">CH${ch} · ${t.name||''}</option>`;
+      }).join('');
+    document.getElementById('my-part-select').innerHTML = opts;
+    const sel2 = document.getElementById('my-part-select2');
+    if (sel2) sel2.innerHTML = '<option value="-1">— 없음 —</option>' + opts.split('\n').slice(1).join('\n');
   },
 
   /* M32 채널 스트립 렌더링 */
@@ -158,11 +161,13 @@ const UI = {
   },
 
   /* 내 파트 강조 */
-  highlightMyPart(idx) {
+  highlightMyParts(idx1, idx2) {
+    const mySet = new Set([idx1, idx2].filter(i => i >= 0));
     document.querySelectorAll('.channel-strip').forEach(s => {
-      s.classList.toggle('mine', +s.dataset.idx === idx);
+      s.classList.toggle('mine', mySet.has(+s.dataset.idx));
     });
   },
+  highlightMyPart(idx) { this.highlightMyParts(idx, -1); },
 
   /* 믹서 상태 → UI 동기화 (프리셋 후 호출) */
   syncFromMixer(mixer) {

@@ -2,14 +2,68 @@
  * app.js — 메인 컨트롤러 (M32 Style)
  */
 
-let songs       = [];
-let mixer       = null;
-let visualizer  = null;
-let currentSong = null;
-let myPartIdx   = -1;
-let updateTimer = null;
+let songs          = [];
+let mixer          = null;
+let visualizer     = null;
+let currentSong    = null;
+let myPartIdx      = -1;   // 주 채널
+let myPartIdx2     = -1;   // 서브 채널 (듀얼)
+let updateTimer    = null;
 
-const FEEDBACK_FORM_URL = ''; // 선택: Google Forms URL
+const FEEDBACK_FORM_URL = '';
+const PIN_CODE          = '8883';
+
+/* ── PIN 인증 ── */
+(function initPin() {
+  if (sessionStorage.getItem('worship_auth') === 'ok') {
+    document.getElementById('pin-screen').classList.add('unlocked');
+    return;
+  }
+  let entered = '';
+  const dots  = document.querySelectorAll('.dot');
+  const errEl = document.getElementById('pin-error');
+
+  function updateDots() {
+    dots.forEach((d, i) => d.classList.toggle('filled', i < entered.length));
+  }
+  function shake() {
+    errEl.classList.remove('hidden');
+    errEl.style.animation = 'none';
+    requestAnimationFrame(() => errEl.style.animation = '');
+    setTimeout(() => errEl.classList.add('hidden'), 1800);
+  }
+  function tryUnlock() {
+    if (entered === PIN_CODE) {
+      sessionStorage.setItem('worship_auth', 'ok');
+      document.getElementById('pin-screen').classList.add('unlocked');
+    } else {
+      shake();
+      entered = '';
+      updateDots();
+    }
+  }
+
+  // 마우스/터치
+  document.querySelectorAll('.pin-key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const n = btn.dataset.n;
+      if (n === 'del') { entered = entered.slice(0, -1); }
+      else if (n === 'ok') { tryUnlock(); }
+      else if (entered.length < 4) { entered += n; }
+      updateDots();
+      if (entered.length === 4) setTimeout(tryUnlock, 150);
+    });
+  });
+
+  // 키보드
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('pin-screen').classList.contains('unlocked')) return;
+    if (e.key >= '0' && e.key <= '9' && entered.length < 4) { entered += e.key; updateDots(); }
+    else if (e.key === 'Backspace') { entered = entered.slice(0,-1); updateDots(); }
+    else if (e.key === 'Enter') tryUnlock();
+    if (entered.length === 4) setTimeout(tryUnlock, 150);
+  });
+})();
 
 /* ── DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -143,21 +197,39 @@ function bindGlobalEvents() {
     updateTimeDisplay();
   });
 
-  // 내 파트
+  // MY CH 1
   document.getElementById('my-part-select').addEventListener('change', e => {
     myPartIdx = +e.target.value;
-    UI.highlightMyPart(myPartIdx);
-    visualizer.setMyChannel(myPartIdx);
+    UI.highlightMyParts(myPartIdx, myPartIdx2);
+    visualizer.setMyChannel(myPartIdx >= 0 ? myPartIdx : myPartIdx2);
+  });
+  // MY CH 2 (듀얼)
+  document.getElementById('my-part-select2').addEventListener('change', e => {
+    myPartIdx2 = +e.target.value;
+    UI.highlightMyParts(myPartIdx, myPartIdx2);
+    if (myPartIdx < 0) visualizer.setMyChannel(myPartIdx2);
+  });
+
+  // 시각화 ON/OFF 토글
+  document.getElementById('vis-toggle-btn').addEventListener('click', () => {
+    const body = document.querySelector('.my-vis-body');
+    const btn  = document.getElementById('vis-toggle-btn');
+    const on   = body.classList.toggle('hidden-body');
+    btn.textContent = on ? '👁 OFF' : '👁 ON';
+    btn.classList.toggle('active', !on);
   });
 
   // 프리셋
   document.querySelectorAll('[data-preset]').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (myPartIdx < 0 && btn.dataset.preset !== 'all') {
-        UI.toast('⚠ 먼저 MY CH 에서 채널을 선택하세요');
+      const preset    = btn.dataset.preset;
+      const groupOK   = ['all','singers','singers_only','instruments'].includes(preset);
+      const hasMyPart = myPartIdx >= 0 || myPartIdx2 >= 0;
+      if (!hasMyPart && !groupOK) {
+        UI.toast('⚠ MY CH를 먼저 선택하세요');
         return;
       }
-      mixer.applyPreset(myPartIdx, btn.dataset.preset);
+      mixer.applyPresetDual(myPartIdx, myPartIdx2, preset);
       UI.syncFromMixer(mixer);
       document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -305,28 +377,30 @@ function bindKeyboard() {
         break;
       }
       case 'ArrowUp': {
-        // MY CH 볼륨 +1dB
-        if (myPartIdx < 0) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
-        const t = mixer.tracks[myPartIdx];
-        if (!t) break;
-        const newDb = Math.min(t.volumeDb + 1, 6);
-        mixer.setTrackVolumeDb(myPartIdx, newDb);
-        _syncFaderUI(myPartIdx, newDb);
-        UI.toast(`🔊 CH${myPartIdx+1} ${UI.dbToLabel(newDb)} dB`);
-        e.preventDefault();
-        break;
+        // MY CH 1+2 복합 +1dB
+        const idxs = [myPartIdx, myPartIdx2].filter(i => i >= 0);
+        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
+        idxs.forEach(i => {
+          const t = mixer.tracks[i]; if (!t) return;
+          const db = Math.min(t.volumeDb + 1, 6);
+          mixer.setTrackVolumeDb(i, db); _syncFaderUI(i, db);
+        });
+        const t1 = mixer.tracks[idxs[0]];
+        UI.toast(`🔊 MY CH +1dB → ${UI.dbToLabel(t1.volumeDb)} dB`);
+        e.preventDefault(); break;
       }
       case 'ArrowDown': {
-        // MY CH 볼륨 -1dB
-        if (myPartIdx < 0) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
-        const t = mixer.tracks[myPartIdx];
-        if (!t) break;
-        const newDb = Math.max(t.volumeDb - 1, -60);
-        mixer.setTrackVolumeDb(myPartIdx, newDb);
-        _syncFaderUI(myPartIdx, newDb);
-        UI.toast(`🔉 CH${myPartIdx+1} ${UI.dbToLabel(newDb)} dB`);
-        e.preventDefault();
-        break;
+        // MY CH 1+2 복합 -1dB
+        const idxs = [myPartIdx, myPartIdx2].filter(i => i >= 0);
+        if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택하세요'); break; }
+        idxs.forEach(i => {
+          const t = mixer.tracks[i]; if (!t) return;
+          const db = Math.max(t.volumeDb - 1, -60);
+          mixer.setTrackVolumeDb(i, db); _syncFaderUI(i, db);
+        });
+        const t1 = mixer.tracks[idxs[0]];
+        UI.toast(`🔉 MY CH -1dB → ${UI.dbToLabel(t1.volumeDb)} dB`);
+        e.preventDefault(); break;
       }
       case ' ': {
         // 스페이스바 = 재생/일시정지

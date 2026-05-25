@@ -301,6 +301,30 @@ class WorshipMixer {
     if (this.masterGain) this.masterGain.gain.value = this.dbToGain(db);
   }
 
+  /* ── 프리셋 (듀얼 채널 지원) ── */
+  applyPresetDual(myIdx, myIdx2, preset) {
+    const mySet = new Set([myIdx, myIdx2].filter(i => i >= 0));
+    this.soloChannels.clear();
+    this.tracks.forEach(t => t.solo = false);
+    this.tracks.forEach((t, i) => {
+      const isMine = mySet.has(i);
+      const group  = t.info.group || '';
+      let db = 0, muted = false;
+      switch (preset) {
+        case 'me_solo':      muted = !isMine; break;
+        case 'me_full':      db = isMine ? 3 : -6; break;
+        case 'singers':      muted = !['leader','vocal_left','vocal_right'].includes(group); break;
+        case 'singers_only': muted = !['vocal_left','vocal_right'].includes(group); break;
+        case 'instruments':  muted = !['keys','bass','guitar','drums'].includes(group); break;
+        case 'me_rhythm':    muted = !(isMine||['drums','bass'].includes(group)); db=isMine?2:-3; break;
+        case 'me_keys':      muted = !(isMine||['keys','synth'].includes(group)); db=isMine?2:-3; break;
+        case 'me_minus':     muted = isMine; break;
+        default:             break;
+      }
+      t.volumeDb = db; t.muted = muted; this._applyGain(i);
+    });
+  }
+
   /* ── 프리셋 ── */
   applyPreset(myIdx, preset) {
     this.soloChannels.clear();

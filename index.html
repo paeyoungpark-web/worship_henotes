@@ -8,6 +8,34 @@
 </head>
 <body class="m32-theme">
 
+  <!-- 핀 잠금 화면 -->
+  <div id="pin-screen">
+    <div class="pin-box">
+      <div class="pin-logo">◉</div>
+      <div class="pin-title">WORSHIP MONITOR</div>
+      <div class="pin-sub">PIN을 입력하세요</div>
+      <div id="pin-dots">
+        <span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span>
+      </div>
+      <div id="pin-error" class="pin-error hidden">⚠ 잘못된 PIN입니다</div>
+      <div class="pin-pad">
+        <button class="pin-key" data-n="1">1</button>
+        <button class="pin-key" data-n="2">2</button>
+        <button class="pin-key" data-n="3">3</button>
+        <button class="pin-key" data-n="4">4</button>
+        <button class="pin-key" data-n="5">5</button>
+        <button class="pin-key" data-n="6">6</button>
+        <button class="pin-key" data-n="7">7</button>
+        <button class="pin-key" data-n="8">8</button>
+        <button class="pin-key" data-n="9">9</button>
+        <button class="pin-key pin-del" data-n="del">⌫</button>
+        <button class="pin-key" data-n="0">0</button>
+        <button class="pin-key pin-ok" data-n="ok">✓</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 상단 헤더 -->
   <header class="console-header">
     <div class="brand">
@@ -80,6 +108,7 @@
           <span class="my-vis-ch" id="my-vis-ch">CH 00</span>
           <span class="my-vis-name" id="my-vis-name"></span>
           <span class="my-vis-badge">MY CHANNEL</span>
+          <button id="vis-toggle-btn" class="vis-toggle active" title="시각화 ON/OFF">👁 ON</button>
         </div>
         <!-- 2\xd72 그리드 (4:3 비율) -->
         <div class="my-vis-body">
