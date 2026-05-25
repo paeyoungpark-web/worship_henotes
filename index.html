@@ -3,70 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>우리교회 찬양팀 실황 모니터</title>
+  <title>찬양팀 실황 모니터</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header>
     <h1>🎵 찬양팀 실황 모니터</h1>
-    <p class="hint">🎧 헤드폰 사용을 권장합니다 · 와이파이 환경 권장</p>
+    <p class="hint">🎧 헤드폰 권장 · 📶 와이파이 권장</p>
   </header>
 
   <main>
-    <!-- 곡 목록 뷰 -->
+    <!-- ── 곡 목록 뷰 ── -->
     <section id="view-list" class="view">
       <h2>곡 목록</h2>
       <div id="song-list"></div>
     </section>
 
-    <!-- 플레이어 뷰 -->
+    <!-- ── 플레이어 뷰 ── -->
     <section id="view-player" class="view hidden">
+
       <button id="back-btn" class="back-btn">← 목록으로</button>
-      <h2 id="song-title"></h2>
-      <p id="song-date" class="meta"></p>
 
-      <div class="my-part">
-        <label for="my-part-select">🎤 내 파트:</label>
-        <select id="my-part-select"></select>
-      </div>
-
-      <div class="transport sticky">
-        <button id="play-btn">▶ 재생</button>
-        <button id="pause-btn">⏸</button>
-        <button id="stop-btn">⏹</button>
-        <span id="time-display">0:00 / 0:00</span>
-      </div>
-
-      <input type="range" id="seek-bar" value="0" min="0" max="1000" step="1">
-
-      <div class="loop-controls">
-        <button id="loop-a-btn">🔁 A 지점</button>
-        <button id="loop-b-btn">🔁 B 지점</button>
-        <button id="loop-toggle-btn">구간반복 OFF</button>
-      </div>
-
-      <div class="presets">
-        <h3>프리셋</h3>
-        <div class="preset-buttons">
-          <button data-preset="all">전체</button>
-          <button data-preset="me_solo">내 파트만</button>
-          <button data-preset="me_full">내 파트 + 풀밴드</button>
-          <button data-preset="me_rhythm">내 파트 + 리듬</button>
-          <button data-preset="me_keys">내 파트 + 키</button>
-          <button data-preset="me_minus">내 파트 빼고 (MR)</button>
+      <!-- 곡 정보 -->
+      <div class="player-header">
+        <div class="player-header-icon">🎵</div>
+        <div class="player-header-info">
+          <div id="song-title"></div>
+          <div id="song-date"></div>
         </div>
       </div>
 
+      <!-- 내 파트 -->
+      <div class="my-part">
+        <label for="my-part-select">🎤 내 파트</label>
+        <select id="my-part-select"></select>
+      </div>
+
+      <!-- 트랜스포트 (sticky) -->
+      <div class="transport sticky">
+        <div class="transport-controls">
+          <button id="play-btn" class="transport-btn">▶ 재생</button>
+          <button id="pause-btn" class="transport-btn">⏸</button>
+          <button id="stop-btn" class="transport-btn">⏹</button>
+        </div>
+        <span id="time-display">0:00 / 0:00</span>
+      </div>
+
+      <!-- 시크바 -->
+      <div class="seekbar-wrap">
+        <input type="range" id="seek-bar" value="0" min="0" max="1000" step="1">
+      </div>
+
+      <!-- 루프 -->
+      <div class="loop-controls">
+        <button id="loop-a-btn" class="loop-btn">🔁 A 지점</button>
+        <button id="loop-b-btn" class="loop-btn">🔁 B 지점</button>
+        <button id="loop-toggle-btn" class="loop-btn">구간반복 OFF</button>
+      </div>
+
+      <!-- 프리셋 -->
+      <div class="presets">
+        <div class="presets-title">프리셋</div>
+        <div class="preset-buttons">
+          <button class="preset-btn active" data-preset="all">전체</button>
+          <button class="preset-btn" data-preset="me_solo">내 파트만</button>
+          <button class="preset-btn" data-preset="me_full">내 파트 + 풀밴드</button>
+          <button class="preset-btn" data-preset="me_rhythm">내 파트 + 리듬</button>
+          <button class="preset-btn" data-preset="me_keys">내 파트 + 키</button>
+          <button class="preset-btn" data-preset="me_minus">내 파트 빼고 (MR)</button>
+        </div>
+      </div>
+
+      <!-- 트랙 그룹 -->
       <div id="track-groups"></div>
 
+      <!-- 액션 버튼 -->
       <div class="actions">
-        <button id="copy-mix-btn">📋 현재 믹스값 복사</button>
-        <button id="feedback-btn">💬 피드백 남기기</button>
+        <button id="copy-mix-btn" class="action-btn">📋 현재 믹스값 복사</button>
+        <button id="feedback-btn" class="action-btn primary">💬 피드백 남기기</button>
       </div>
 
+      <!-- 로딩 오버레이 -->
       <div id="loading" class="loading hidden">
+        <div class="loading-icon">🎵</div>
         <p>로딩 중... <span id="loading-progress">0</span>%</p>
+        <div class="loading-bar-wrap">
+          <div class="loading-bar" style="width:0%"></div>
+        </div>
       </div>
+
     </section>
   </main>
 
