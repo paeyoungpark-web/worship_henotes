@@ -165,6 +165,9 @@
       <div class="status-bar">
         <span class="status-led" id="status-led"></span>
         <span id="status-text">READY</span>
+        <button id="my-recordings-btn" class="rec-nav-btn" title="내 녹음 목록">
+          🎤 내 녹음<span id="rec-badge" class="rec-badge" style="display:none"></span>
+        </button>
       </div>
     </header>
 
@@ -188,6 +191,8 @@
         <button id="play-btn"  class="tr-btn tr-play"><span class="tr-icon">▶</span><span class="tr-label">PLAY</span></button>
         <button id="pause-btn" class="tr-btn tr-pause" disabled><span class="tr-icon">❚❚</span><span class="tr-label">PAUSE</span></button>
         <button id="stop-btn"  class="tr-btn tr-stop"  disabled><span class="tr-icon">■</span><span class="tr-label">STOP</span></button>
+        <button id="rec-btn" class="tr-btn tr-rec" title="녹음 시작/종료"><span class="tr-icon">⏺</span><span class="tr-label">REC</span></button>
+        <button id="countin-toggle" class="tr-btn-sm" title="4박자 카운트인 ON/OFF">4카운트 OFF</button>
         <div class="time-display">
           <span id="time-current">0:00.0</span>
           <span class="time-sep">/</span>
@@ -198,17 +203,6 @@
           <button id="loop-b-btn"      class="tr-btn-sm">SET B</button>
           <button id="loop-toggle-btn" class="tr-btn-sm">LOOP OFF</button>
         </div>
-      </div>
-
-      <!-- ⭐ 곡 네비게이션 바 -->
-      <div class="song-nav-bar">
-        <button id="prev-song-btn" class="song-nav-btn" title="이전 곡" disabled>
-          <span class="sn-icon">⏮</span><span class="sn-label">PREV</span>
-        </button>
-        <div class="song-pager" id="song-pager"></div>
-        <button id="next-song-btn" class="song-nav-btn" title="다음 곡" disabled>
-          <span class="sn-label">NEXT</span><span class="sn-icon">⏭</span>
-        </button>
       </div>
 
       <!-- 파형 + 시크바 -->
@@ -281,6 +275,15 @@
       </div>
 
       <!-- 도움말 -->
+      <!-- 내 녹음 모달 -->
+      <div id="recordings-modal" class="modal hidden">
+        <div class="modal-content recordings-modal-content">
+          <button class="modal-close" onclick="Recorder.closeModal()">✕</button>
+          <h2 id="recordings-title">🎤 내 녹음</h2>
+          <div id="recordings-list" class="recordings-list"></div>
+        </div>
+      </div>
+
       <div id="help-modal" class="modal hidden">
         <div class="modal-content">
           <button class="modal-close" id="help-close">✕</button>
@@ -300,6 +303,7 @@
   <script src="js/mixer.js"></script>
   <script src="js/visualizer.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/recorder.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

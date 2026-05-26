@@ -405,98 +405,249 @@ body {
   .playlist-controls { justify-content: center; }
 }
 
+/* ════════════════════════════════════════
+   추가 연습 — 녹음 모듈 스타일
+════════════════════════════════════════ */
 
-/* ===== 곡 네비게이션 바 (CD 스타일) ===== */
-.song-nav-bar {
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+/* ── REC 버튼 ── */
+.tr-rec {
+  border-color: var(--red) !important;
+  color: var(--red) !important;
+  position: relative;
+}
+.tr-rec:not(:disabled):hover {
+  background: rgba(231,76,60,0.15) !important;
+}
+.tr-rec.recording {
+  background: var(--red) !important;
+  color: #fff !important;
+  border-color: var(--red) !important;
+  animation: rec-blink 0.9s ease-in-out infinite;
+}
+.tr-rec.recording .tr-icon { animation: rec-pulse 0.9s ease-in-out infinite; }
+@keyframes rec-blink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(231,76,60,0.7); }
+  50%       { opacity: 0.75; box-shadow: 0 0 4px rgba(231,76,60,0.3); }
+}
+@keyframes rec-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.25); }
 }
 
-.song-nav-btn {
-  background: var(--bg-strip);
-  border: 1px solid var(--border-b);
-  color: var(--text);
-  padding: 8px 12px;
+/* ── 내 녹음 버튼 (헤더) ── */
+.rec-nav-btn {
+  background: rgba(231,76,60,0.12);
+  border: 1px solid var(--red);
+  color: var(--red);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  padding: 4px 10px;
   cursor: pointer;
-  display: flex;
+  letter-spacing: 0.5px;
+  border-radius: 3px;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
-  letter-spacing: 1px;
-  transition: all 0.1s;
-  white-space: nowrap;
-  flex-shrink: 0;
+  transition: all 0.15s;
+  margin-left: 8px;
 }
-.song-nav-btn:hover:not(:disabled) {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
+.rec-nav-btn:hover {
+  background: rgba(231,76,60,0.25);
+  color: #ff8a80;
 }
-.song-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.song-nav-btn .sn-icon { font-size: 1.1em; }
 
-.song-pager {
-  flex: 1;
+/* ── 배지 ── */
+.rec-badge {
+  background: var(--red);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 카운트인 오버레이 ── */
+.countin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  padding: 2px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-b) transparent;
+  align-items: center;
+  justify-content: center;
+  z-index: 8888;
 }
-.song-pager::-webkit-scrollbar { height: 6px; }
-.song-pager::-webkit-scrollbar-track { background: transparent; }
-.song-pager::-webkit-scrollbar-thumb { background: var(--border-b); }
-
-.pager-dot {
-  background: var(--bg-strip);
-  border: 1px solid var(--border-b);
-  color: var(--text);
-  padding: 6px 10px;
-  font-family: inherit;
-  cursor: pointer;
+.countin-box {
+  background: var(--bg-panel);
+  border: 2px solid var(--red);
+  box-shadow: 0 0 40px rgba(231,76,60,0.4);
+  padding: 36px 48px;
+  text-align: center;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 70px;
-  transition: all 0.15s;
-  flex-shrink: 0;
+  gap: 10px;
 }
-.pager-dot:hover { border-color: var(--accent); }
-.pager-dot.active {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
-  font-weight: 700;
-  box-shadow: 0 0 8px rgba(255,140,26,0.4);
-}
-.pager-dot .dot-num {
-  font-size: 0.62rem;
-  opacity: 0.75;
-  letter-spacing: 1px;
-}
-.pager-dot .dot-title {
+.countin-sub {
+  color: var(--text-dim);
   font-size: 0.72rem;
-  margin-top: 2px;
-  max-width: 110px;
+  letter-spacing: 2px;
+  font-family: monospace;
+}
+.countin-number {
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  font-family: monospace;
+  transition: transform 0.1s;
+}
+.countin-number.countin-pulse {
+  animation: c-pulse 0.12s ease-out;
+}
+@keyframes c-pulse {
+  0%   { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.countin-label {
+  color: var(--text);
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  font-family: monospace;
+}
+.countin-cancel {
+  margin-top: 8px;
+  background: var(--bg-strip);
+  border: 1px solid var(--border-b);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 6px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  border-radius: 3px;
+}
+.countin-cancel:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── 내 녹음 모달 ── */
+.recordings-modal-content {
+  max-width: 640px !important;
+  max-height: 85vh !important;
+}
+.recordings-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  max-height: calc(85vh - 100px);
+}
+.rec-loading, .rec-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+.rec-empty-hint {
+  display: block;
+  margin-top: 8px;
+  color: var(--red);
+  font-size: 0.8rem;
+}
+.rec-date-group {
+  margin-bottom: 12px;
+}
+.rec-date-header {
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  padding: 6px 4px 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  font-family: monospace;
+}
+.rec-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.rec-item:hover { background: var(--bg-panel-2); }
+.rec-item-info { flex: 1; min-width: 0; }
+.rec-item-title {
+  color: var(--text-bright);
+  font-size: 0.85rem;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 3px;
 }
-.pager-dot.speech .dot-title { opacity: 0.7; font-style: italic; }
+.rec-item-meta {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.rec-ch-tag {
+  background: rgba(255,140,26,0.15);
+  border: 1px solid rgba(255,140,26,0.3);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+}
+.rec-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.rec-btn {
+  background: var(--bg-strip);
+  border: 1px solid var(--border-b);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.65rem;
+  padding: 5px 7px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  transition: all 0.1s;
+}
+.rec-btn-both {
+  border-color: var(--green);
+  color: var(--green);
+}
+.rec-btn-both:hover { background: rgba(46,204,113,0.15); }
 
+.rec-btn-solo {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.rec-btn-solo:hover { background: rgba(0,229,255,0.1); }
+
+.rec-btn-dl:hover { color: var(--accent); border-color: var(--accent); }
+
+.rec-btn-del { border-color: var(--red); color: var(--red); }
+.rec-btn-del:hover { background: rgba(231,76,60,0.15); }
+
+/* 모바일 대응 */
 @media (max-width: 600px) {
-  .song-nav-btn .sn-label { display: none; }
-  .song-nav-btn { padding: 8px 10px; }
-  .pager-dot { min-width: 60px; padding: 5px 8px; }
-  .pager-dot .dot-title { max-width: 80px; }
+  .tr-rec .tr-label { display: none; }
+  .rec-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .rec-item-actions { width: 100%; justify-content: flex-start; }
+  .countin-number { font-size: 4rem; }
+  .countin-box { padding: 24px 28px; }
 }
