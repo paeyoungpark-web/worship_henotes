@@ -200,6 +200,17 @@
         </div>
       </div>
 
+      <!-- ⭐ 곡 네비게이션 바 -->
+      <div class="song-nav-bar">
+        <button id="prev-song-btn" class="song-nav-btn" title="이전 곡" disabled>
+          <span class="sn-icon">⏮</span><span class="sn-label">PREV</span>
+        </button>
+        <div class="song-pager" id="song-pager"></div>
+        <button id="next-song-btn" class="song-nav-btn" title="다음 곡" disabled>
+          <span class="sn-label">NEXT</span><span class="sn-icon">⏭</span>
+        </button>
+      </div>
+
       <!-- 파형 + 시크바 -->
       <canvas id="waveform-canvas" height="40" style="width:100%;display:block;background:#0a0a0c;"></canvas>
       <div class="seek-row"><input type="range" id="seek-bar" value="0" min="0" max="1000" step="1"></div>

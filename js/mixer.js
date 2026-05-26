@@ -201,6 +201,7 @@ class WorshipMixer {
     this.songEnd   = null;
     this.soloChannels.clear();
     this.loop = { enabled: false, a: null, b: null };
+    this._loadedSig = null; // ⭐ 캐시 시그니처 초기화
   }
 
   /* ── 핵심: Sample-accurate 동기 재생 ── */

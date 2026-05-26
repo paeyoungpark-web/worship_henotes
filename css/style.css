@@ -404,3 +404,99 @@ body {
   .playlist-bar  { flex-direction: column; align-items: stretch; text-align: center; }
   .playlist-controls { justify-content: center; }
 }
+
+
+/* ===== 곡 네비게이션 바 (CD 스타일) ===== */
+.song-nav-bar {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.song-nav-btn {
+  background: var(--bg-strip);
+  border: 1px solid var(--border-b);
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 1px;
+  transition: all 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.song-nav-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.song-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.song-nav-btn .sn-icon { font-size: 1.1em; }
+
+.song-pager {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-b) transparent;
+}
+.song-pager::-webkit-scrollbar { height: 6px; }
+.song-pager::-webkit-scrollbar-track { background: transparent; }
+.song-pager::-webkit-scrollbar-thumb { background: var(--border-b); }
+
+.pager-dot {
+  background: var(--bg-strip);
+  border: 1px solid var(--border-b);
+  color: var(--text);
+  padding: 6px 10px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.pager-dot:hover { border-color: var(--accent); }
+.pager-dot.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255,140,26,0.4);
+}
+.pager-dot .dot-num {
+  font-size: 0.62rem;
+  opacity: 0.75;
+  letter-spacing: 1px;
+}
+.pager-dot .dot-title {
+  font-size: 0.72rem;
+  margin-top: 2px;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pager-dot.speech .dot-title { opacity: 0.7; font-style: italic; }
+
+@media (max-width: 600px) {
+  .song-nav-btn .sn-label { display: none; }
+  .song-nav-btn { padding: 8px 10px; }
+  .pager-dot { min-width: 60px; padding: 5px 8px; }
+  .pager-dot .dot-title { max-width: 80px; }
+}

@@ -282,19 +282,61 @@ function openService(serviceId) {
 }
 
 /* ══════════════ 플레이어 ══════════════ */
+
+// 트랙 시그니처(같은 곡 묶음인지 판별용)
+function getTrackSignature(tracks) {
+  return tracks.map(t => t.file).sort().join('|');
+}
+
 async function openSong(serviceId, teamIdx, songIdx, fromPlaylist = false) {
   const s    = allServices.find(x => x.id === serviceId);
   const song = s?.teams?.[teamIdx]?.songs?.[songIdx];
   if (!song || !song.tracks?.length) return;
 
+  // ⭐ 핵심: 같은 트랙 시그니처면 재로딩 스킵 → segment만 점프
+  const newSig  = getTrackSignature(song.tracks);
+  const sameMix = (mixer._loadedSig === newSig && mixer.tracks.length > 0);
+
   currentSongData = { ...song, _service: s, _team: s.teams[teamIdx] };
   showView('player');
-  Loading.show(song.title);
   if (fromPlaylist) updatePlaylistBar();
   else stopPlaylist();
 
   document.getElementById('song-title').textContent = song.title;
   document.getElementById('song-date').textContent  = `${formatDateKr(s.date)} · ${s.teams[teamIdx].name}`;
+
+  if (sameMix) {
+    // ⭐ 즉시 점프 경로 — 로딩 없음
+    console.log(`✨ 캐시 히트: segment만 점프 (${song.title})`);
+    mixer.stop();
+    mixer.setSongSegment(song.start || 0, song.end || null);
+    stopUpdateLoop();
+
+    UI.setTransportState('ready');
+    const seekBar = document.getElementById('seek-bar');
+    seekBar.value = 0;
+    seekBar.max   = Math.floor(mixer.songDuration * 1000);
+
+    mixer.onEnded = () => {
+      if (playlistState.active) setTimeout(() => playNextInPlaylist(), 600);
+    };
+
+    renderSongPager(s, teamIdx, songIdx);
+    updateTimeDisplay();
+    startUpdateLoop();
+
+    if (fromPlaylist) {
+      setTimeout(() => {
+        if (mixer.ctx?.state === 'suspended') mixer.ctx.resume();
+        mixer.play(0);
+        UI.setTransportState('playing');
+      }, 200);
+    }
+    return;
+  }
+
+  // ⭐ 풀 로딩 경로 — 새로운 곡 묵음일 때만
+  Loading.show(song.title);
 
   // name/group 자동 보완
   song.tracks.forEach(t => {
@@ -315,6 +357,9 @@ async function openSong(serviceId, teamIdx, songIdx, fromPlaylist = false) {
     loaded++;
     Loading.update(loaded, total);
   });
+
+  // ⭐ 로딩 완료된 시그니처 기록
+  mixer._loadedSig = newSig;
 
   UI.renderMyPartSelector(song.tracks);
   UI.renderChannelStrips(song.tracks, mixer);
@@ -342,8 +387,17 @@ async function openSong(serviceId, teamIdx, songIdx, fromPlaylist = false) {
   document.getElementById('loop-toggle-btn').textContent = 'LOOP OFF';
   document.getElementById('loop-toggle-btn').classList.remove('active');
 
+  renderSongPager(s, teamIdx, songIdx);
   updateTimeDisplay();
   startUpdateLoop();
+
+  if (fromPlaylist) {
+    setTimeout(() => {
+      if (mixer.ctx?.state === 'suspended') mixer.ctx.resume();
+      mixer.play(0);
+      UI.setTransportState('playing');
+    }, 300);
+  }
 }
 
 /* ══════════════ 글로벌 이벤트 ══════════════ */
@@ -442,6 +496,10 @@ function bindGlobalEvents() {
     btn.classList.toggle('active', mixer.loop.enabled);
   });
 
+  // ⭐ 곡 네비게이션 (이전/다음)
+  document.getElementById('prev-song-btn').addEventListener('click', goToPrevSong);
+  document.getElementById('next-song-btn').addEventListener('click', goToNextSong);
+
   // 마스터 페이더
   document.getElementById('master-fader').addEventListener('input', e => {
     const db = +e.target.value;
@@ -479,25 +537,10 @@ function bindKeyboard() {
     if (document.getElementById('view-player').classList.contains('hidden')) return;
 
     switch (e.key) {
-      case 'ArrowRight': { // 다음 곡
-        if (!currentService || !currentSongData) break;
-        const team = currentSongData._team;
-        const si = team.songs.indexOf(currentSongData) < 0
-          ? team.songs.findIndex(s=>s.id===currentSongData.id) : team.songs.indexOf(currentSongData);
-        const next = team.songs[si+1];
-        if (next) { openSong(currentService.id, currentService.teams.indexOf(team), si+1); UI.toast(`▶ ${next.title}`); }
-        else UI.toast('⚠ 마지막 곡');
-        e.preventDefault(); break;
-      }
-      case 'ArrowLeft': { // 이전 곡
-        if (!currentService || !currentSongData) break;
-        const team = currentSongData._team;
-        const si = team.songs.findIndex(s=>s.id===currentSongData.id);
-        const prev = team.songs[si-1];
-        if (prev) { openSong(currentService.id, currentService.teams.indexOf(team), si-1); UI.toast(`◀ ${prev.title}`); }
-        else UI.toast('⚠ 첫 번째 곡');
-        e.preventDefault(); break;
-      }
+      case 'ArrowRight': // 다음 곡
+        goToNextSong(); e.preventDefault(); break;
+      case 'ArrowLeft':  // 이전 곡
+        goToPrevSong(); e.preventDefault(); break;
       case 'ArrowUp': { // MY CH +1dB
         const idxs = [myPartIdx,myPartIdx2].filter(i=>i>=0);
         if (!idxs.length) { UI.toast('⚠ MY CH를 먼저 선택'); break; }
@@ -579,6 +622,65 @@ function showView(name) {
 
 function scrollToId(id) {
   document.getElementById(id)?.scrollIntoView({ behavior:'smooth' });
+}
+
+/* ══════════════ 곡 네비게이션 바 ══════════════ */
+function renderSongPager(service, teamIdx, currentSongIdx) {
+  const team  = service.teams[teamIdx];
+  const songs = team.songs || [];
+  const pager = document.getElementById('song-pager');
+  if (!pager) return;
+
+  pager.innerHTML = '';
+  songs.forEach((song, idx) => {
+    const dot = document.createElement('button');
+    dot.className = 'pager-dot' +
+      (idx === currentSongIdx ? ' active' : '') +
+      (song.type === 'speech'  ? ' speech' : '');
+    dot.dataset.songIdx = idx;
+    dot.innerHTML = `
+      <span class="dot-num">${(idx + 1).toString().padStart(2, '0')}</span>
+      <span class="dot-title">${song.title}</span>
+    `;
+    dot.addEventListener('click', () => {
+      openSong(service.id, teamIdx, idx, playlistState.active);
+    });
+    pager.appendChild(dot);
+  });
+
+  document.getElementById('prev-song-btn').disabled = currentSongIdx <= 0;
+  document.getElementById('next-song-btn').disabled = currentSongIdx >= songs.length - 1;
+
+  const activeDot = pager.querySelector('.pager-dot.active');
+  if (activeDot) {
+    setTimeout(() => activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 100);
+  }
+}
+
+function goToPrevSong() {
+  if (!currentSongData || !currentService) return;
+  const team = currentSongData._team;
+  const si   = team.songs.findIndex(s => s.id === currentSongData.id);
+  if (si > 0) {
+    const ti = currentService.teams.indexOf(team);
+    openSong(currentService.id, ti, si - 1, playlistState.active);
+    UI.toast(`◄ ${team.songs[si-1].title}`);
+  } else {
+    UI.toast('⚠ 첫 번째 곡입니다');
+  }
+}
+
+function goToNextSong() {
+  if (!currentSongData || !currentService) return;
+  const team = currentSongData._team;
+  const si   = team.songs.findIndex(s => s.id === currentSongData.id);
+  if (si < team.songs.length - 1) {
+    const ti = currentService.teams.indexOf(team);
+    openSong(currentService.id, ti, si + 1, playlistState.active);
+    UI.toast(`► ${team.songs[si+1].title}`);
+  } else {
+    UI.toast('⚠ 마지막 곡입니다');
+  }
 }
 
 function formatDateKr(dateStr) {
