@@ -21,6 +21,10 @@ class WorshipMixer {
     // 곡 구간
     this.songStart    = 0;
     this.songEnd      = null;
+    // 연속 재생 콜백
+    this.onEnded      = null;
+    this._endedFired  = false;
+    this._endedTimer  = null;
   }
 
   /* ── 초기화 ── */
@@ -210,14 +214,27 @@ class WorshipMixer {
 
     this.startTime = targetStart - relOffset;
 
+    this._endedFired = false;
     this.tracks.forEach(t => {
       const src = this.ctx.createBufferSource();
       src.buffer = t.buffer;
       src.connect(t.gain);
-      src.start(targetStart, bufOffset); // 모든 트랙이 동일한 targetStart를 받음
+      src.start(targetStart, bufOffset);
       t.source = src;
     });
     this.isPlaying = true;
+
+    // 곡 종료 감지 타이머
+    const maxDuration = Math.max(...this.tracks.map(t => t.buffer.duration));
+    const remaining   = (maxDuration - (this.songStart + relOffset)) * 1000;
+    if (this._endedTimer) clearTimeout(this._endedTimer);
+    this._endedTimer = setTimeout(() => {
+      if (this.isPlaying && !this._endedFired) {
+        this._endedFired = true;
+        this.isPlaying   = false;
+        if (typeof this.onEnded === 'function') this.onEnded();
+      }
+    }, Math.max(remaining + 300, 500));
   }
 
   pause() {
@@ -228,6 +245,8 @@ class WorshipMixer {
   }
 
   stop() {
+    if (this._endedTimer) { clearTimeout(this._endedTimer); this._endedTimer = null; }
+    this._endedFired = true;
     this._stopSources();
     this.pauseTime = 0;
     this.isPlaying = false;

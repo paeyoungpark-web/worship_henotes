@@ -11,6 +11,32 @@ let myPartIdx  = -1;
 let myPartIdx2 = -1;
 let updateTimer = null;
 
+/* 연속 재생 전역 상태 */
+const playlistState = {
+  active: false,
+  queue: [],
+  currentIndex: 0,
+  scope: null
+};
+
+/* 로딩 오버레이 제어 */
+const Loading = {
+  show(songTitle) {
+    const el = document.getElementById('loading');
+    const titleEl = document.getElementById('loading-title');
+    if (titleEl) titleEl.textContent = songTitle ? `"${songTitle}" 준비 중...` : 'LOADING SCENE...';
+    document.getElementById('loading-progress').textContent = '0';
+    document.getElementById('loading-fill').style.width = '0%';
+    el.classList.remove('hidden');
+  },
+  update(loaded, total) {
+    const pct = total > 0 ? Math.round((loaded / total) * 100) : 0;
+    document.getElementById('loading-progress').textContent = pct;
+    document.getElementById('loading-fill').style.width = pct + '%';
+  },
+  hide() { document.getElementById('loading').classList.add('hidden'); }
+};
+
 const FEEDBACK_FORM_URL = '';
 const PIN_CODE = '8883';
 
@@ -142,6 +168,73 @@ function applyFilters() {
   renderArchive(list);
 }
 
+/* 연속 재생 함수들 */
+function startPlaylist(service, scope, teamIdx = null) {
+  const queue = [];
+  if (scope === 'service') {
+    service.teams.forEach((team, tIdx) => {
+      (team.songs || []).forEach((song, sIdx) => {
+        queue.push({ serviceId: service.id, teamIdx: tIdx, songIdx: sIdx, title: song.title, teamName: team.name });
+      });
+    });
+  } else if (scope === 'team' && teamIdx !== null) {
+    const team = service.teams[teamIdx];
+    (team.songs || []).forEach((song, sIdx) => {
+      queue.push({ serviceId: service.id, teamIdx: teamIdx, songIdx: sIdx, title: song.title, teamName: team.name });
+    });
+  }
+  if (!queue.length) return;
+  playlistState.active = true;
+  playlistState.queue  = queue;
+  playlistState.currentIndex = 0;
+  playlistState.scope  = scope;
+  playCurrentInPlaylist();
+}
+
+function playCurrentInPlaylist() {
+  const item = playlistState.queue[playlistState.currentIndex];
+  if (!item) { stopPlaylist(); return; }
+  openSong(item.serviceId, item.teamIdx, item.songIdx, true);
+}
+
+function playNextInPlaylist() {
+  if (!playlistState.active) return;
+  if (playlistState.currentIndex < playlistState.queue.length - 1) {
+    playlistState.currentIndex++;
+    playCurrentInPlaylist();
+  } else {
+    UI.toast('🎉 모든 곡 재생 완료!');
+    stopPlaylist();
+  }
+}
+
+function playPrevInPlaylist() {
+  if (!playlistState.active || playlistState.currentIndex <= 0) return;
+  playlistState.currentIndex--;
+  playCurrentInPlaylist();
+}
+
+function stopPlaylist() {
+  playlistState.active = false;
+  playlistState.queue  = [];
+  playlistState.currentIndex = 0;
+  document.getElementById('playlist-bar').classList.add('hidden');
+}
+
+function updatePlaylistBar() {
+  const bar = document.getElementById('playlist-bar');
+  if (!playlistState.active) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  const cur   = playlistState.currentIndex + 1;
+  const total = playlistState.queue.length;
+  document.getElementById('playlist-current').textContent = `${cur} / ${total}`;
+  const next = playlistState.queue[playlistState.currentIndex + 1];
+  document.getElementById('playlist-next-title').textContent =
+    next ? `${next.teamName} - ${next.title}` : '(마지막 곡입니다)';
+  document.getElementById('playlist-prev-btn').disabled = playlistState.currentIndex === 0;
+  document.getElementById('playlist-next-btn').disabled = playlistState.currentIndex >= total - 1;
+}
+
 /* ══════════════ 회차 상세 ══════════════ */
 function openService(serviceId) {
   const s = allServices.find(x => x.id === serviceId);
@@ -153,6 +246,13 @@ function openService(serviceId) {
   document.getElementById('service-leader').textContent = s.leader || '—';
   document.getElementById('service-theme').textContent  = s.theme  || '—';
 
+  // 전체곡 연속 재생 카드 업데이트
+  const totalSongs = s.teams.reduce((n, t) => n + (t.songs?.length || 0), 0);
+  const summaryEl = document.getElementById('play-all-summary');
+  if (summaryEl) summaryEl.textContent = `${s.teams.length}개 팀 · 총 ${totalSongs}곡 연속 재생`;
+  const playAllBtn = document.getElementById('play-all-service-btn');
+  if (playAllBtn) playAllBtn.onclick = () => startPlaylist(s, 'service');
+
   document.getElementById('teams-container').innerHTML = s.teams.map((team, ti) => `
     <div class="team-section">
       <div class="team-header">
@@ -161,6 +261,7 @@ function openService(serviceId) {
           <div class="team-name">${team.name}</div>
           <div class="team-leader">${team.leader?`👤 ${team.leader}`:''}</div>
         </div>
+        ${(team.songs?.length||0) > 1 ? `<button class="btn-play-team" onclick="startPlaylist(currentService,'team',${ti});event.stopPropagation()">▶ 팀 전체(${team.songs.length}곡)</button>` : ''}
       </div>
       <div class="song-list">
         ${(team.songs||[]).map((song, si) => `
@@ -181,14 +282,16 @@ function openService(serviceId) {
 }
 
 /* ══════════════ 플레이어 ══════════════ */
-async function openSong(serviceId, teamIdx, songIdx) {
+async function openSong(serviceId, teamIdx, songIdx, fromPlaylist = false) {
   const s    = allServices.find(x => x.id === serviceId);
   const song = s?.teams?.[teamIdx]?.songs?.[songIdx];
   if (!song || !song.tracks?.length) return;
 
   currentSongData = { ...song, _service: s, _team: s.teams[teamIdx] };
   showView('player');
-  UI.showLoading(true, 0);
+  Loading.show(song.title);
+  if (fromPlaylist) updatePlaylistBar();
+  else stopPlaylist();
 
   document.getElementById('song-title').textContent = song.title;
   document.getElementById('song-date').textContent  = `${formatDateKr(s.date)} · ${s.teams[teamIdx].name}`;
@@ -210,14 +313,18 @@ async function openSong(serviceId, teamIdx, songIdx) {
   const total = song.tracks.length;
   await mixer.loadAllTracks(song.tracks, () => {
     loaded++;
-    UI.showLoading(true, Math.round((loaded/total)*100));
+    Loading.update(loaded, total);
   });
 
   UI.renderMyPartSelector(song.tracks);
   UI.renderChannelStrips(song.tracks, mixer);
   visualizer.init(mixer);
 
-  UI.showLoading(false);
+  mixer.onEnded = () => {
+    if (playlistState.active) setTimeout(() => playNextInPlaylist(), 600);
+  };
+
+  Loading.hide();
   UI.setTransportState('ready');
 
   const seekBar = document.getElementById('seek-bar');
@@ -248,6 +355,13 @@ function bindGlobalEvents() {
 
   // 홈 ← 회차
   document.getElementById('back-to-home').addEventListener('click', () => { showView('home'); window.scrollTo(0,0); });
+
+  // 연속 재생 컨트롤 버튼
+  document.getElementById('playlist-next-btn').addEventListener('click', playNextInPlaylist);
+  document.getElementById('playlist-prev-btn').addEventListener('click', playPrevInPlaylist);
+  document.getElementById('playlist-stop-btn').addEventListener('click', () => {
+    stopPlaylist(); UI.toast('■ 연속 재생 종료');
+  });
 
   // 회차 ← 플레이어
   document.getElementById('back-btn').addEventListener('click', () => {
@@ -476,6 +590,8 @@ function formatDateKr(dateStr) {
 }
 
 // 전역 노출
-window.openService = openService;
-window.openSong    = openSong;
-window.scrollToId  = scrollToId;
+window.openService   = openService;
+window.openSong      = openSong;
+window.scrollToId    = scrollToId;
+window.startPlaylist = startPlaylist;
+window.stopPlaylist  = stopPlaylist;

@@ -127,11 +127,36 @@
       <div class="meta-item"><span class="meta-label">👤 인도</span><span id="service-leader" class="meta-value">—</span></div>
       <div class="meta-item"><span class="meta-label">📖 말씀</span><span id="service-theme"  class="meta-value">—</span></div>
     </div>
+    <!-- 전체곡 연속 재생 카드 -->
+    <div class="play-all-section">
+      <div class="play-all-card">
+        <div class="play-all-info">
+          <h3>🎵 전체 곡 연속 듣기</h3>
+          <p id="play-all-summary">전체 곡을 순서대로 이어서 들을 수 있습니다</p>
+        </div>
+        <div class="play-all-actions">
+          <button class="btn-play-all" id="play-all-service-btn">▶ 회차 전체 재생</button>
+        </div>
+      </div>
+    </div>
     <div id="teams-container"></div>
   </section>
 
   <!-- ======= 플레이어 뷰 (M32 콘솔) ======= -->
   <section id="view-player" class="view view-player hidden">
+    <!-- 연속 재생 바 -->
+    <div id="playlist-bar" class="playlist-bar hidden">
+      <div class="playlist-info">
+        <span class="playlist-label">📻 연속 재생 중</span>
+        <span id="playlist-current">1 / 1</span>
+      </div>
+      <div class="playlist-next">다음 곡: <strong id="playlist-next-title">마지막 곡입니다</strong></div>
+      <div class="playlist-controls">
+        <button id="playlist-prev-btn" class="pl-btn">⏮ 이전</button>
+        <button id="playlist-next-btn" class="pl-btn">다음 ⏭</button>
+        <button id="playlist-stop-btn" class="pl-btn pl-stop">■ 연속재생 종료</button>
+      </div>
+    </div>
     <header class="console-header">
       <div class="brand">
         <span class="logo">◉</span>
@@ -234,7 +259,11 @@
       <div id="loading" class="loading-overlay hidden">
         <div class="loading-box">
           <div class="loading-led"></div>
-          <div class="loading-text">LOADING SCENE...</div>
+          <div class="loading-text" id="loading-title">LOADING SCENE...</div>
+          <div class="loading-message">
+            개별 음원 로딩중이라 시간이 걸립니다.<br>
+            <span class="loading-sub">조금만 기다려 주세요 🙏</span>
+          </div>
           <div class="loading-progress-bar"><div class="loading-progress-fill" id="loading-fill"></div></div>
           <div class="loading-percent"><span id="loading-progress">0</span>%</div>
         </div>

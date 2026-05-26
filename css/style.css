@@ -313,3 +313,94 @@ body {
   .my-vis-panel { max-width:100%; }
   .my-vis-body { height:76px; }
 }
+
+/* ===== 전체곡 연속 재생 카드 ===== */
+.play-all-section { margin: 20px 0 8px; }
+.play-all-card {
+  background: linear-gradient(135deg, #1a3a2a 0%, #2d5f3f 100%);
+  border: 1px solid #3a7a50;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: #fff;
+}
+.play-all-info h3 { margin: 0 0 4px; font-size: 1.05em; color: #a8f0c0; }
+.play-all-info p  { margin: 0; font-size: 0.85em; color: #7db895; }
+.btn-play-all {
+  background: #a8f0c0;
+  color: #0d2818;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 0.95em;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.btn-play-all:hover { background: #c5f7d5; transform: translateY(-1px); }
+
+/* 팀별 전체 재생 버튼 */
+.btn-play-team {
+  background: #b8860b;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.15s;
+}
+.btn-play-team:hover { background: #d4a017; }
+
+/* ===== 로딩 메시지 추가 ===== */
+.loading-message {
+  color: #aaa;
+  font-size: 0.82em;
+  line-height: 1.6;
+  margin: 6px 0 10px;
+  text-align: center;
+}
+.loading-sub { color: #f0a830; font-size: 0.9em; }
+
+/* ===== 연속 재생 바 ===== */
+.playlist-bar {
+  background: #1a1a2e;
+  border-bottom: 1px solid #b8860b;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  z-index: 10;
+}
+.playlist-bar.hidden { display: none; }
+.playlist-label { color: #f0a830; font-weight: 700; margin-right: 8px; font-size: 0.85em; }
+.playlist-info  { color: #ddd; font-size: 0.85em; }
+.playlist-next  { color: #999; font-size: 0.82em; }
+.playlist-next strong { color: #eee; }
+.playlist-controls { display: flex; gap: 6px; }
+.pl-btn {
+  background: #333;
+  color: #ccc;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pl-btn:hover { background: #444; }
+.pl-btn.pl-stop { background: #5a1a1a; color: #f88; }
+.pl-btn.pl-stop:hover { background: #7a2020; }
+@media (max-width: 600px) {
+  .play-all-card { flex-direction: column; text-align: center; }
+  .playlist-bar  { flex-direction: column; align-items: stretch; text-align: center; }
+  .playlist-controls { justify-content: center; }
+}
