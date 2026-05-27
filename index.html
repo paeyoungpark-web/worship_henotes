@@ -202,6 +202,45 @@
         </div>
       </div>
 
+      <!-- 레코딩 전용 영역 -->
+      <div class="rec-bar">
+        <div class="rec-bar-section rec-bar-controls">
+          <button id="rec-btn" class="rec-main-btn" title="녹음 시작">
+            <span class="tr-icon">🔴</span><span class="tr-label">REC</span>
+          </button>
+          <button id="rec-stop-btn" class="rec-stop-btn" title="녹음 정지" disabled>
+            <span class="tr-icon">■</span><span class="tr-label">STOP</span>
+          </button>
+          <span id="rec-led" class="rec-led hidden">●</span>
+        </div>
+
+        <div class="rec-bar-section rec-bar-monitor">
+          <div id="rec-input-meter" class="rec-input-meter hidden">
+            <span class="rec-meter-label">MIC</span>
+            <div class="rec-meter-bar-wrap">
+              <div id="rec-meter-bar" class="rec-meter-bar"></div>
+            </div>
+            <span id="rec-meter-db" class="rec-meter-db">-∞</span>
+          </div>
+        </div>
+
+        <div class="rec-bar-section rec-bar-fx">
+          <div class="rec-mode-toggle" title="클린: 에코제거 ON / 로우: 원음">
+            <span class="rec-fx-label">MODE</span>
+            <div class="rec-mode-switch">
+              <button id="rec-mode-clean" class="rec-mode-btn active" data-mode="clean">CLEAN</button>
+              <button id="rec-mode-raw" class="rec-mode-btn" data-mode="raw">RAW</button>
+            </div>
+          </div>
+
+          <div class="rec-reverb-control" title="녹음 리버브">
+            <span class="rec-fx-label">REVERB</span>
+            <input type="range" id="rec-reverb-knob" min="0" max="100" value="0" step="1">
+            <span id="rec-reverb-val" class="rec-fx-val">0%</span>
+          </div>
+        </div>
+      </div>
+
       <!-- ⭐ 곡 네비게이션 바 -->
       <div class="song-nav-bar">
         <button id="prev-song-btn" class="song-nav-btn" title="이전 곡" disabled>
