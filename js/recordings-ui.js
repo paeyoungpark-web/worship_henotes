@@ -208,11 +208,12 @@ const RecordingsUI = {
     });
 
     if (willSync) {
-      if (rec.mixSnapshot) {
-        this._restoreMixSnapshot(rec.mixSnapshot);
-        UI?.toast?.('🎚 녹음 시점의 믹스 상태 복원됨');
-      }
-      await this._playSynced(rec, audioEl);
+      // 임시: mixSnapshot 복원 비활성화 (디버깅용)
+      // if (rec.mixSnapshot) {
+      // this._restoreMixSnapshot(rec.mixSnapshot);
+      // UI?.toast?.('🎚 녹음 시점의 믹스 상태 복원됨');
+      // }
+      await this._playSynced(rec, audioEl, rec.startOffset);
     } else {
       if (this._syncMode && !this._forceSync) {
         if (!hasMixerLoaded) {
