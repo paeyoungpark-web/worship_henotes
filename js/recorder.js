@@ -134,27 +134,19 @@ const Recorder = {
   async start() {
     if (this._state.isRecording) return;
 
-    // 안전장치: mixer 자체가 없거나 트랙이 없으면 차단
-    if (!window.mixer && !window.currentSongData) {
-      this._toast('⚠️ 곡을 먼저 선택하고 재생하세요');
-      return;
-    }
-
     // 🎧 헤드셋 착용 경고 (항상 표시)
     this._showHeadphoneWarning();
 
     try {
-      // 마이크 권한 요청
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: false,  // 원음 유지
+          echoCancellation: false,
           noiseSuppression: false,
           autoGainControl:  false,
           sampleRate:       44100,
         },
       });
 
-      // 코덱 자동 선택
       const mimeType = this._pickMimeType();
       let mr;
       try {
@@ -169,9 +161,15 @@ const Recorder = {
       };
       mr.onstop = () => this._onStop(mr.mimeType || mimeType);
 
-      // ── 곡이 반드시 재생 중이므로 실시간 현재 위치 캡처 ──
-      const offset = window.mixer.getCurrentTime();
+      // 현재 재생 위치 — 안전하게 캡처 (없으면 0)
+      let offset = 0;
+      try {
+        if (typeof mixer !== 'undefined' && mixer?.getCurrentTime) {
+          offset = mixer.getCurrentTime() || 0;
+        }
+      } catch { offset = 0; }
 
+      // 곡 정보 — 안전하게 캡처 (없으면 기본값)
       this._state.songSnapshot = {
         serviceId:   window.currentService?.id   ?? null,
         teamIdx:     window.currentTeamIdx       ?? 0,
@@ -191,7 +189,7 @@ const Recorder = {
       mr.start(1000);
       this._setRecUI(true);
 
-      this._toast(`🔴 녹음 시작 — ${this._state.songSnapshot.songTitle} (${this._fmtTime(offset)})`);
+      this._toast(`🔴 녹음 시작 (${this._fmtTime(offset)}부터)`);
 
     } catch (err) {
       console.error('[Recorder] 시작 실패:', err);
@@ -203,7 +201,7 @@ const Recorder = {
         this._toast('❌ 녹음 시작 실패: ' + err.message);
       }
     }
-  },
+    },
 
   /* ── 헤드셋 경고 모달 ── */
   _showHeadphoneWarning() {
@@ -310,14 +308,18 @@ const Recorder = {
     try {
       const idx = window.myPartIdx;
       if (idx == null || idx < 0) return '전체';
-      return window.mixer?.tracks?.[idx]?.info?.name || `CH ${idx + 1}`;
+      if (typeof mixer !== 'undefined') {
+        return mixer.tracks?.[idx]?.info?.name || `CH ${idx + 1}`;
+      }
+      return '전체';
     } catch { return '알 수 없음'; }
   },
 
   /* ── 트랙 시그니처 (원곡 싱크 판정용) ── */
   _getTrackSig() {
     try {
-      const tracks = window.mixer?.tracks || [];
+      const tracks = (typeof mixer !== 'undefined' ? mixer?.tracks : null) || [];
+      if (!tracks.length) return null;
       return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
     } catch { return null; }
   },
