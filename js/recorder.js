@@ -134,18 +134,31 @@ const Recorder = {
   async start() {
     if (this._state.isRecording) return;
 
-    // 🎧 헤드셋 착용 경고 (항상 표시)
+    // 헤드셋 경고
     this._showHeadphoneWarning();
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
+      // 모드별 마이크 설정
+      const audioConstraints = this.mode === 'clean'
+        ? {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl:  true,
+          sampleRate:       44100
+        }
+        : {
           echoCancellation: false,
           noiseSuppression: false,
           autoGainControl:  false,
-          sampleRate:       44100,
-        },
-      });
+          sampleRate:       44100
+        };
+
+      let stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+
+      // 리버브 처리 적용
+      if (this.reverbAmount > 0) {
+        stream = this._buildReverbStream(stream);
+      }
 
       const mimeType = this._pickMimeType();
       let mr;
@@ -178,8 +191,10 @@ const Recorder = {
         channelIdx:  window.myPartIdx            ?? -1,
         channelName: this._getChannelName(),
         trackSig:    this._getTrackSig(),
-        songKey:     this._getSongKey(),           // 곡 식별 고유 키
-        mixSnapshot: this._captureMixSnapshot(),  // 녹음 시점 믹스 상태
+        songKey:     this._getSongKey(),
+        recordMode:  this.mode,
+        reverbAmount: this.reverbAmount,
+        mixSnapshot: this._captureMixSnapshot(),
       };
 
       this._state.startOffset   = offset;
@@ -192,7 +207,7 @@ const Recorder = {
       this._setRecUI(true);
       this._setupLevelMeter(stream);  // 입력 레벨 미터 시작
 
-      this._toast(`🔴 녹음 시작 (${this._fmtTime(offset)}부터)`);
+      this._toast(`🔴 녹음 시작 (${this.mode.toUpperCase()}, 리버브 ${Math.round(this.reverbAmount*100)}%, ${this._fmtTime(offset)}부터)`);
 
     } catch (err) {
       console.error('[Recorder] 시작 실패:', err);
@@ -255,8 +270,19 @@ const Recorder = {
     const blob     = new Blob(this._state.chunks, { type: mimeType });
     const duration = (Date.now() - this._state.startWallTime) / 1000;
 
+    // 처리 노드 정리
+    if (this._state.processingCtx) {
+      try { this._state.processingCtx.close(); } catch(e) {}
+    }
+    this._state.processingCtx = null;
+    this._state.sourceNode = null;
+    this._state.dryGain = null;
+    this._state.wetGain = null;
+    this._state.convolver = null;
+    this._state.destinationNode = null;
+
     this._state.stream?.getTracks().forEach(t => t.stop());
-    this._stopLevelMeter();  // 레벨미터 정지
+    this._stopLevelMeter();
 
     const snap   = this._state.songSnapshot;
     const record = {
@@ -270,6 +296,8 @@ const Recorder = {
       channelIdx:  snap.channelIdx,
       trackSig:    snap.trackSig,
       songKey:     snap.songKey ?? null,
+      recordMode:  snap.recordMode,
+      reverbAmount: snap.reverbAmount,
       mixSnapshot: snap.mixSnapshot ?? null,  // 녹음 시점 믹스 상태
       startOffset: this._state.startOffset,
       duration,
@@ -338,6 +366,52 @@ const Recorder = {
       const s   = window.currentSongIdx ?? 0;
       return `${sid}_t${t}_s${s}`;
     } catch { return null; }
+  },
+
+  /* ── 리버브 처리 파이프라인 ── */
+  _buildReverbStream(inputStream) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+      const source = ctx.createMediaStreamSource(inputStream);
+
+      const dryGain = ctx.createGain();
+      const wetGain = ctx.createGain();
+      dryGain.gain.value = 1 - this.reverbAmount * 0.7;
+      wetGain.gain.value = this.reverbAmount * 0.8;
+
+      const convolver = ctx.createConvolver();
+      convolver.buffer = this._createImpulseResponse(ctx, 2.2, 2.5);
+
+      const destination = ctx.createMediaStreamDestination();
+
+      source.connect(dryGain).connect(destination);
+      source.connect(convolver).connect(wetGain).connect(destination);
+
+      this._state.processingCtx = ctx;
+      this._state.sourceNode = source;
+      this._state.dryGain = dryGain;
+      this._state.wetGain = wetGain;
+      this._state.convolver = convolver;
+      this._state.destinationNode = destination;
+
+      return destination.stream;
+    } catch(e) {
+      console.warn('리버브 빌드 실패, 원본 스트림 사용:', e);
+      return inputStream;
+    }
+  },
+
+  _createImpulseResponse(ctx, duration, decay) {
+    const rate = ctx.sampleRate;
+    const length = rate * duration;
+    const impulse = ctx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      }
+    }
+    return impulse;
   },
 
   /* ── 녹음 시점 믹스 상태 캡처 ── */
