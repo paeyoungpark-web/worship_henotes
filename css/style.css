@@ -643,3 +643,100 @@ body {
   .rec-item-meta { font-size: .7rem; gap: 8px; }
   .my-rec-btn { font-size: 0.68rem; padding: 5px 9px; }
 }
+
+/* ════════════════════════════════════════
+   레코딩연습 v2 — 헤드폰 경고 + 싱크 슬라이더 + 배지
+════════════════════════════════════════ */
+
+/* ── 🎧 헤드셋 착용 경고 모달 ── */
+.headphone-warning {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.82);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(6px);
+}
+.headphone-warning-box {
+  background: #1a1a1a;
+  border: 2px solid #f0a830;
+  border-radius: 14px;
+  padding: 32px 36px;
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 0 40px rgba(240,168,48,.25);
+  animation: warning-pop .25s ease;
+}
+@keyframes warning-pop {
+  from { transform: scale(.88); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.headphone-icon  { font-size: 3rem; margin-bottom: 10px; }
+.headphone-title {
+  color: #f0a830; font-size: 1.1rem; font-weight: 700;
+  letter-spacing: 1px; margin-bottom: 12px;
+}
+.headphone-msg {
+  color: #bbb; font-size: .88rem; line-height: 1.7;
+  margin-bottom: 22px;
+}
+.headphone-msg strong { color: #fff; }
+.headphone-actions { display: flex; flex-direction: column; gap: 10px; }
+.headphone-btn-ok {
+  background: #f0a830; color: #111;
+  border: none; border-radius: 8px;
+  padding: 12px 20px; font-weight: 700;
+  font-size: .9rem; cursor: pointer;
+  transition: .15s;
+}
+.headphone-btn-ok:hover { background: #ffc840; }
+.headphone-btn-cancel {
+  background: transparent; color: #666;
+  border: 1px solid #333; border-radius: 8px;
+  padding: 9px 20px; font-size: .85rem;
+  cursor: pointer; transition: .15s;
+}
+.headphone-btn-cancel:hover { color: #aaa; border-color: #555; }
+
+/* ── 싱크 보정 슬라이더 ── */
+.rec-sync-offset {
+  display: flex; align-items: center; gap: 7px;
+  color: #bbb; font-size: .78rem;
+  cursor: default; user-select: none;
+  white-space: nowrap;
+}
+.rec-sync-offset input[type="range"] {
+  width: 100px;
+  accent-color: #f0a830;
+  cursor: pointer;
+}
+#rec-sync-offset-val {
+  min-width: 46px; text-align: right;
+  color: #f0a830; font-family: monospace;
+  font-size: .8rem;
+}
+
+/* ── 싱크 가능/불가 배지 ── */
+.rec-sync-badge {
+  background: rgba(46,204,113,.15);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+  font-size: .65rem; font-weight: 600;
+  padding: 1px 7px; border-radius: 3px;
+  letter-spacing: .5px;
+  vertical-align: middle;
+}
+.rec-nosync-badge {
+  background: rgba(150,150,150,.1);
+  border: 1px solid #555;
+  color: #666;
+  font-size: .65rem;
+  padding: 1px 7px; border-radius: 3px;
+  vertical-align: middle;
+}
+
+/* 모바일 대응 */
+@media (max-width: 600px) {
+  .rec-sync-offset { display: none; } /* 모바일에선 슬라이더 숨김 */
+  .headphone-warning-box { padding: 24px 20px; }
+}

@@ -1,13 +1,17 @@
 /**
- * recordings-ui.js — 녹음 목록 모달 + 재생 (원곡 동기 재생 옵션)
+ * recordings-ui.js — 녹음 목록 모달 + 원곡 싱크 재생
  *
- * 브랜치: feature/레코딩연습 (가능성 테스트)
- * 의존성: RecorderDB(recorder.js), mixer(전역), UI(전역)
+ * 브랜치: feature/레코딩연습
+ * - trackSig 비교로 원곡 싱크 판정
+ * - 선예약 동시 시작 (_playSynced)
+ * - ±500ms 싱크 보정 슬라이더
  */
 const RecordingsUI = {
-  _modal:    null,
-  _audioEl:  null,
-  _syncMode: true,   // 원곡과 동시 재생 여부
+  _modal:       null,
+  _audioEl:     null,
+  _currentRec:  null,
+  _syncMode:    true,   // 원곡과 동시 재생 여부
+  _syncOffsetMs: 0,     // 싱크 보정 (ms)
 
   /* ── 모달 열기 ── */
   async open() {
@@ -36,6 +40,11 @@ const RecordingsUI = {
                 <input type="checkbox" id="rec-sync-cb" checked>
                 <span>원곡과 함께 재생</span>
               </label>
+              <label class="rec-sync-offset" title="원곡 대비 녹음 시간 보정 (ms)">
+                <span>싱크 보정</span>
+                <input type="range" id="rec-sync-offset" min="-500" max="500" step="10" value="0">
+                <span id="rec-sync-offset-val">0ms</span>
+              </label>
               <button class="rec-close-btn" id="rec-close-btn">✕</button>
             </div>
           </div>
@@ -48,15 +57,25 @@ const RecordingsUI = {
 
     this._modal = document.getElementById('rec-modal');
 
+    // 닫기
     document.getElementById('rec-close-btn')
       .addEventListener('click', () => this.close());
-
     this._modal.addEventListener('click', e => {
       if (e.target === this._modal) this.close();
     });
 
+    // 원곡 동시 재생 토글
     document.getElementById('rec-sync-cb')
       .addEventListener('change', e => { this._syncMode = e.target.checked; });
+
+    // 싱크 보정 슬라이더
+    const slider  = document.getElementById('rec-sync-offset');
+    const valSpan = document.getElementById('rec-sync-offset-val');
+    slider.addEventListener('input', e => {
+      const ms = parseInt(e.target.value);
+      this._syncOffsetMs = ms;
+      valSpan.textContent = (ms >= 0 ? '+' : '') + ms + 'ms';
+    });
   },
 
   /* ── 목록 렌더링 ── */
@@ -77,46 +96,53 @@ const RecordingsUI = {
     // 저장공간 정보
     if (info) {
       const s = await RecorderDB.getStorageInfo();
-      if (s) {
-        const usedMB  = (s.usage  / 1024 / 1024).toFixed(1);
-        const totalGB = (s.quota  / 1024 / 1024 / 1024).toFixed(1);
-        info.textContent =
-          `💾 ${usedMB} MB 사용 / ${totalGB} GB · 총 ${recs.length}개 녹음`;
-      } else {
-        info.textContent = `총 ${recs.length}개 녹음`;
-      }
+      const usedMB  = s ? (s.usage / 1024 / 1024).toFixed(1) + ' MB 사용' : '';
+      info.textContent = `총 ${recs.length}개 녹음${usedMB ? ' · ' + usedMB : ''}`;
     }
 
     if (!recs.length) {
       list.innerHTML = `
         <div class="rec-empty">
           아직 녹음이 없습니다.<br>
-          곡 재생 중 🔴 <strong>REC</strong> 버튼을 눌러 녹음을 시작하세요.
+          🔴 <strong>REC</strong> 버튼을 눌러 녹음을 시작하세요.<br>
+          <span style="font-size:.78rem;color:#444;margin-top:8px;display:block">
+            곡 재생 중 또는 정지 상태 모두 녹음 가능합니다.
+          </span>
         </div>`;
       return;
     }
 
-    list.innerHTML = recs.map(r => `
-      <div class="rec-item" data-id="${r.id}">
-        <div class="rec-item-info">
-          <div class="rec-item-title">${this._esc(r.songTitle)}</div>
-          <div class="rec-item-meta">
-            <span>🎤 ${this._esc(r.channelName)}</span>
-            <span>⏱ ${this._fmtDur(r.duration)}</span>
-            <span>📅 ${this._fmtDate(r.timestamp)}</span>
-            <span>💾 ${(r.size / 1024 / 1024).toFixed(2)} MB</span>
-            ${r.startOffset > 0
-              ? `<span>▶ ${this._fmtDur(r.startOffset)}부터</span>`
-              : ''}
+    // 현재 트랙 시그니처 (싱크 가능 여부 표시용)
+    const curSig = this._getCurrentTrackSig();
+
+    list.innerHTML = recs.map(r => {
+      const canSync = r.hasSong && r.trackSig && r.trackSig === curSig;
+      const syncBadge = canSync
+        ? '<span class="rec-sync-badge">🔗 싱크 가능</span>'
+        : (r.hasSong ? '<span class="rec-nosync-badge">곡 미로드</span>' : '');
+
+      return `
+        <div class="rec-item" data-id="${r.id}">
+          <div class="rec-item-info">
+            <div class="rec-item-title">${this._esc(r.songTitle)} ${syncBadge}</div>
+            <div class="rec-item-meta">
+              <span>🎤 ${this._esc(r.channelName)}</span>
+              <span>⏱ ${this._fmtDur(r.duration)}</span>
+              <span>📅 ${this._fmtDate(r.timestamp)}</span>
+              <span>💾 ${(r.size / 1024 / 1024).toFixed(2)}MB</span>
+              ${r.startOffset > 0
+                ? `<span>▶ ${this._fmtDur(r.startOffset)}부터</span>`
+                : ''}
+            </div>
           </div>
-        </div>
-        <div class="rec-item-actions">
-          <button data-action="play"     data-id="${r.id}" class="rec-btn-play">▶ 재생</button>
-          <button data-action="download" data-id="${r.id}" class="rec-btn-dl">⬇ 다운로드</button>
-          <button data-action="delete"   data-id="${r.id}" class="rec-btn-del">🗑</button>
-        </div>
-        <audio class="rec-item-audio hidden" data-id="${r.id}" controls preload="none"></audio>
-      </div>`).join('');
+          <div class="rec-item-actions">
+            <button data-action="play"     data-id="${r.id}" class="rec-btn-play">▶ 재생</button>
+            <button data-action="download" data-id="${r.id}" class="rec-btn-dl">⬇ 다운로드</button>
+            <button data-action="delete"   data-id="${r.id}" class="rec-btn-del">🗑</button>
+          </div>
+          <audio class="rec-item-audio hidden" data-id="${r.id}" controls preload="none"></audio>
+        </div>`;
+    }).join('');
 
     // 이벤트 위임
     list.querySelectorAll('[data-action]').forEach(btn => {
@@ -136,43 +162,113 @@ const RecordingsUI = {
 
     this._stopPlayback();
 
-    // 원곡 동기 재생 모드
-    if (this._syncMode && window.mixer && window.currentService) {
-      const sameSong =
-        rec.serviceId === window.currentService?.id &&
-        rec.songIdx   === window.currentSongIdx;
-
-      if (sameSong) {
-        try {
-          window.mixer.stop();
-          window.mixer.seek(rec.startOffset);
-          window.mixer.play(rec.startOffset);
-          if (window.UI?.setTransportState) UI.setTransportState('playing');
-        } catch (e) {
-          console.warn('[RecordingsUI] 원곡 동기 실패:', e);
-        }
-      } else {
-        UI?.toast?.('ℹ️ 다른 곡 녹음 — 녹음만 재생합니다');
-      }
-    }
-
-    // 녹음 재생
+    // 녹음 오디오 엘리먼트 준비
+    const url     = URL.createObjectURL(rec.blob);
     const audioEl = this._modal.querySelector(`audio[data-id="${id}"]`);
     if (!audioEl) return;
 
-    const url = URL.createObjectURL(rec.blob);
     audioEl.src = url;
     audioEl.classList.remove('hidden');
-    audioEl.play().catch(e => console.warn('[RecordingsUI] 재생 실패:', e));
-    this._audioEl = audioEl;
+    this._audioEl    = audioEl;
+    this._currentRec = rec;
+
+    // 싱크 조건 판정: syncMode ON + 곡 정보 있음 + trackSig 일치
+    const canSync = this._syncMode
+      && rec.hasSong
+      && window.mixer
+      && window.currentService
+      && rec.trackSig
+      && rec.trackSig === this._getCurrentTrackSig();
+
+    if (canSync) {
+      await this._playSynced(rec, audioEl);
+    } else {
+      if (this._syncMode && rec.hasSong) {
+        UI?.toast?.('ℹ️ 해당 곡이 로드되지 않아 녹음만 재생합니다');
+      }
+      audioEl.currentTime = 0;
+      await audioEl.play().catch(e => console.warn('[RecordingsUI] 재생 실패:', e));
+    }
 
     audioEl.onended = () => {
       URL.revokeObjectURL(url);
-      if (this._syncMode && window.mixer) {
-        try { window.mixer.pause(); if (window.UI?.setTransportState) UI.setTransportState('paused'); }
-        catch {}
+      if (canSync && window.mixer) {
+        try {
+          window.mixer.pause();
+          if (window.UI?.setTransportState) UI.setTransportState('paused');
+        } catch {}
       }
     };
+  },
+
+  /* ── 원곡 동기 재생 (선예약 동시 시작) ── */
+  async _playSynced(rec, audioEl) {
+    try {
+      // 1) 믹서 정지 후 시작 위치로 시드
+      window.mixer.stop();
+      audioEl.currentTime = 0;
+      audioEl.preload     = 'auto';
+
+      // 2) 녹음 오디오 재생 준비 완료까지 대기
+      await this._waitCanPlay(audioEl);
+
+      // 3) 싱크 보정 적용 (offsetSec: 양수 = 녹음을 앞으로, 음수 = 녹음을 뒤로)
+      const offsetSec   = (this._syncOffsetMs || 0) / 1000;
+      const audioDelay  = offsetSec < 0 ? Math.abs(offsetSec) * 1000 : 0;
+
+      if (offsetSec > 0) {
+        audioEl.currentTime = offsetSec; // 녹음을 더 빨리 시작
+      }
+
+      // 4) 믹서 seek
+      if (typeof window.mixer.seek === 'function') {
+        window.mixer.seek(rec.startOffset);
+      }
+
+      // 5) requestAnimationFrame으로 같은 프레임에 동시 시작
+      requestAnimationFrame(() => {
+        const startAudio = () =>
+          audioEl.play().catch(e => console.warn('[RecordingsUI] 녹음 재생 실패:', e));
+
+        if (audioDelay > 0) {
+          // 녹음을 지연 시작 (믹서를 먼저 시작)
+          try { window.mixer.play(); if (window.UI?.setTransportState) UI.setTransportState('playing'); } catch {}
+          setTimeout(startAudio, audioDelay);
+        } else {
+          // 동시 시작
+          startAudio();
+          try { window.mixer.play(); if (window.UI?.setTransportState) UI.setTransportState('playing'); } catch {}
+        }
+      });
+
+      console.log('[RecordingsUI] 싱크 재생 시작. offset:', rec.startOffset, '보정:', this._syncOffsetMs, 'ms');
+      UI?.toast?.(`🎚 싱크 재생 — 보정 ${(this._syncOffsetMs >= 0 ? '+' : '') + this._syncOffsetMs}ms`, 3000);
+
+    } catch (e) {
+      console.error('[RecordingsUI] 싱크 재생 오류:', e);
+      audioEl.play().catch(() => {});
+    }
+  },
+
+  /* ── 녹음 오디오 재생 준비 대기 ── */
+  _waitCanPlay(audioEl) {
+    return new Promise(resolve => {
+      if (audioEl.readyState >= 3) return resolve();
+      const onReady = () => {
+        audioEl.removeEventListener('canplay', onReady);
+        resolve();
+      };
+      audioEl.addEventListener('canplay', onReady);
+      setTimeout(resolve, 1500); // 타임아웃 안전장치
+    });
+  },
+
+  /* ── 현재 로드된 트랙 시그니처 ── */
+  _getCurrentTrackSig() {
+    try {
+      const tracks = window.mixer?.tracks || [];
+      return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
+    } catch { return null; }
   },
 
   /* ── 모든 재생 중지 ── */
@@ -180,6 +276,7 @@ const RecordingsUI = {
     if (this._audioEl) {
       this._audioEl.pause();
       this._audioEl.classList.add('hidden');
+      this._audioEl.removeAttribute('src');
       this._audioEl = null;
     }
     this._modal?.querySelectorAll('.rec-item-audio').forEach(a => {
@@ -199,8 +296,8 @@ const RecordingsUI = {
                : rec.mimeType?.includes('ogg')  ? 'ogg'
                : 'audio';
     const safe = rec.songTitle.replace(/[/\\?%*:|"<>]/g, '_');
-    const date = this._fmtDate(rec.timestamp).replace(/[:\s]/g, '-');
-    const name = `${safe}_${this._esc(rec.channelName)}_${date}.${ext}`;
+    const date = this._fmtDate(rec.timestamp).replace(/[:\s/]/g, '-');
+    const name = `${safe}_${rec.channelName}_${date}.${ext}`;
 
     const url = URL.createObjectURL(rec.blob);
     const a   = document.createElement('a');

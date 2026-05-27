@@ -1,8 +1,10 @@
 /**
  * recorder.js — 마이크 더빙 녹음 + IndexedDB 저장
  *
- * 브랜치: feature/레코딩연습 (가능성 테스트)
- * 의존성: mixer(전역), UI(전역), currentService(전역)
+ * 브랜치: feature/레코딩연습
+ * - 곡 선택 여부와 무관하게 언제든 녹음 가능
+ * - 곡이 로드된 경우 타임라인(startOffset) + trackSig 저장
+ * - 재생 시 trackSig 일치 여부로 원곡 싱크 재생 판정
  * mixer.js / visualizer.js 수정 없음
  */
 
@@ -101,24 +103,16 @@ const Recorder = {
     else                          await this.start();
   },
 
-  /* ── 녹음 시작 ── */
+  /* ── 녹음 시작 — 곡 선택 여부와 무관하게 즉시 동작 ── */
   async start() {
     if (this._state.isRecording) return;
 
-    if (!window.mixer || !window.currentService) {
-      this._toast('⚠️ 곡을 먼저 선택해주세요');
-      return;
-    }
+    // 🎧 헤드셋 착용 경고 (항상 표시)
+    this._showHeadphoneWarning();
 
-    // 헤드폰 안내 (최초 1회)
-    if (!sessionStorage.getItem('rec_headphone_ok')) {
-      this._toast('🎧 헤드폰 필수! 스피커 사용 시 피드백 발생', 4000);
-      sessionStorage.setItem('rec_headphone_ok', '1');
-    }
-
-    let stream;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      // 마이크 권한 요청
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: false,  // 원음 유지
           noiseSuppression: false,
@@ -126,7 +120,57 @@ const Recorder = {
           sampleRate:       44100,
         },
       });
+
+      // 코덱 자동 선택
+      const mimeType = this._pickMimeType();
+      let mr;
+      try {
+        mr = new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 128000 });
+      } catch {
+        mr = new MediaRecorder(stream);
+      }
+
+      this._state.chunks = [];
+      mr.ondataavailable = e => {
+        if (e.data?.size > 0) this._state.chunks.push(e.data);
+      };
+      mr.onstop = () => this._onStop(mr.mimeType || mimeType);
+
+      // ── 곡이 로드된 경우 타임라인 + 트랙 시그니처 캡처 ──
+      const hasMixer = !!(window.mixer?.tracks?.length);
+      const offset   = hasMixer
+        ? (window.mixer.isPlaying
+            ? window.mixer.getCurrentTime()
+            : (window.mixer.pauseTime ?? 0))
+        : 0;
+
+      this._state.songSnapshot = {
+        hasSong:     hasMixer && !!window.currentService,
+        serviceId:   window.currentService?.id  ?? null,
+        teamIdx:     window.currentTeamIdx      ?? null,
+        songIdx:     window.currentSongIdx      ?? null,
+        songTitle:   window.currentSongData?.title ?? window.currentSongTitle ?? '(곡 미선택)',
+        channelIdx:  window.myPartIdx           ?? -1,
+        channelName: hasMixer ? this._getChannelName() : '(독립 녹음)',
+        trackSig:    hasMixer ? this._getTrackSig() : null,
+      };
+
+      this._state.startOffset   = offset;
+      this._state.startWallTime = Date.now();
+      this._state.stream        = stream;
+      this._state.mediaRecorder = mr;
+      this._state.isRecording   = true;
+
+      mr.start(1000);  // 1초 단위 청크
+      this._setRecUI(true);
+
+      const label = hasMixer
+        ? `🔴 녹음 시작 — ${this._state.songSnapshot.songTitle} (${this._fmtTime(offset)})`
+        : '🔴 녹음 시작 — 독립 모드';
+      this._toast(label);
+
     } catch (err) {
+      console.error('[Recorder] 시작 실패:', err);
       if (err.name === 'NotAllowedError') {
         this._toast('❌ 마이크 권한이 필요합니다');
       } else if (err.name === 'NotFoundError') {
@@ -134,52 +178,44 @@ const Recorder = {
       } else {
         this._toast('❌ 녹음 시작 실패: ' + err.message);
       }
-      return;
     }
+  },
 
-    // 코덱 자동 선택
-    const mimeType = this._pickMimeType();
-    let mr;
-    try {
-      mr = new MediaRecorder(stream, {
-        mimeType,
-        audioBitsPerSecond: 128000,
-      });
-    } catch {
-      mr = new MediaRecorder(stream);
-    }
+  /* ── 헤드셋 경고 모달 ── */
+  _showHeadphoneWarning() {
+    // 기존 경고가 있으면 제거
+    document.getElementById('headphone-warning')?.remove();
 
-    this._state.chunks = [];
-    mr.ondataavailable = e => {
-      if (e.data?.size > 0) this._state.chunks.push(e.data);
-    };
-    mr.onstop = () => this._onStop(mr.mimeType || mimeType);
+    const el = document.createElement('div');
+    el.id        = 'headphone-warning';
+    el.className = 'headphone-warning';
+    el.innerHTML = `
+      <div class="headphone-warning-box">
+        <div class="headphone-icon">🎧</div>
+        <div class="headphone-title">헤드셋 착용 확인</div>
+        <div class="headphone-msg">
+          스피커로 재생 시 마이크가 소리를 다시 녹음해<br>
+          <strong>피드백 루프(하울링)</strong>가 발생합니다.<br>
+          반드시 <strong>헤드셋/이어폰</strong>을 착용해주세요.
+        </div>
+        <div class="headphone-actions">
+          <button id="headphone-ok" class="headphone-btn-ok">✅ 착용했습니다 — 녹음 시작</button>
+          <button id="headphone-cancel" class="headphone-btn-cancel">취소</button>
+        </div>
+      </div>`;
+    document.body.appendChild(el);
 
-    // 재생 위치 캡처
-    const offset = window.mixer.isPlaying
-      ? window.mixer.getCurrentTime()
-      : (window.mixer.pauseTime ?? 0);
+    // 확인 → 녹음 시작 (이미 진입 전 호출이므로 단순 닫기)
+    document.getElementById('headphone-ok').addEventListener('click', () => el.remove());
+    document.getElementById('headphone-cancel').addEventListener('click', () => {
+      el.remove();
+      // 취소 플래그 — _start 내부에서 처리하지 않고 별도 토글 방식이므로
+      // 이미 시작된 경우 stop() 호출
+      if (this._state.isRecording) this.stop();
+    });
 
-    // 곡 스냅샷
-    this._state.songSnapshot = {
-      serviceId:     window.currentService?.id  ?? '',
-      teamIdx:       window.currentTeamIdx      ?? 0,
-      songIdx:       window.currentSongIdx      ?? 0,
-      songTitle:     window.currentSongData?.title ?? window.currentSongTitle ?? '제목 없음',
-      channelIdx:    window.myPartIdx           ?? -1,
-      channelName:   this._getChannelName(),
-    };
-
-    this._state.startOffset   = offset;
-    this._state.startWallTime = Date.now();
-    this._state.stream        = stream;
-    this._state.mediaRecorder = mr;
-    this._state.isRecording   = true;
-
-    mr.start(1000);  // 1초 단위 청크
-
-    this._setRecUI(true);
-    this._toast(`🔴 녹음 시작 (${this._fmtTime(offset)}부터)`);
+    // 배경 클릭으로 닫기
+    el.addEventListener('click', e => { if (e.target === el) el.remove(); });
   },
 
   /* ── 녹음 종료 ── */
@@ -187,7 +223,6 @@ const Recorder = {
     if (!this._state.isRecording) return;
     const mr = this._state.mediaRecorder;
     if (mr && mr.state !== 'inactive') mr.stop();
-    // _onStop 콜백에서 후처리
   },
 
   /* ── 녹음 종료 후 처리 ── */
@@ -195,18 +230,20 @@ const Recorder = {
     const blob     = new Blob(this._state.chunks, { type: mimeType });
     const duration = (Date.now() - this._state.startWallTime) / 1000;
 
-    // 마이크 스트림 해제
     this._state.stream?.getTracks().forEach(t => t.stop());
 
+    const snap   = this._state.songSnapshot;
     const record = {
       id:          'rec_' + Date.now(),
       timestamp:   Date.now(),
-      serviceId:   this._state.songSnapshot.serviceId,
-      teamIdx:     this._state.songSnapshot.teamIdx,
-      songIdx:     this._state.songSnapshot.songIdx,
-      songTitle:   this._state.songSnapshot.songTitle,
-      channelName: this._state.songSnapshot.channelName,
-      channelIdx:  this._state.songSnapshot.channelIdx,
+      hasSong:     snap.hasSong,
+      serviceId:   snap.serviceId,
+      teamIdx:     snap.teamIdx,
+      songIdx:     snap.songIdx,
+      songTitle:   snap.songTitle,
+      channelName: snap.channelName,
+      channelIdx:  snap.channelIdx,
+      trackSig:    snap.trackSig,    // 원곡 싱크 식별용
       startOffset: this._state.startOffset,
       duration,
       mimeType,
@@ -217,14 +254,13 @@ const Recorder = {
     RecorderDB.save(record)
       .then(() => {
         const mb = (blob.size / 1024 / 1024).toFixed(1);
-        this._toast(`💾 저장됨 — ${record.songTitle} (${this._fmtTime(duration)}, ${mb}MB)`);
+        this._toast(`💾 저장됨 — ${snap.songTitle} (${this._fmtTime(duration)}, ${mb}MB)`);
       })
       .catch(err => {
         console.error('[RecorderDB] 저장 실패:', err);
         this._toast('❌ 저장 실패: ' + err.message);
       });
 
-    // 상태 초기화
     this._state.isRecording   = false;
     this._state.mediaRecorder = null;
     this._state.stream        = null;
@@ -255,6 +291,14 @@ const Recorder = {
     } catch { return '알 수 없음'; }
   },
 
+  /* ── 트랙 시그니처 (원곡 싱크 판정용) ── */
+  _getTrackSig() {
+    try {
+      const tracks = window.mixer?.tracks || [];
+      return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
+    } catch { return null; }
+  },
+
   /* ── REC 버튼 + LED UI 업데이트 ── */
   _setRecUI(isRec) {
     const btn = document.getElementById('rec-btn');
@@ -267,7 +311,6 @@ const Recorder = {
     }
     if (led) led.classList.toggle('hidden', !isRec);
 
-    // LED 점멸
     clearInterval(this._state.ledTimer);
     if (isRec && led) {
       this._state.ledTimer = setInterval(() => {
