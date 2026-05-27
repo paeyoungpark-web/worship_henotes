@@ -7,11 +7,12 @@
  * - ±500ms 싱크 보정 슬라이더
  */
 const RecordingsUI = {
-  _modal:       null,
-  _audioEl:     null,
-  _currentRec:  null,
-  _syncMode:    true,   // 원곡과 동시 재생 여부
-  _syncOffsetMs: 0,     // 싱크 보정 (ms)
+  _modal:        null,
+  _audioEl:      null,
+  _currentRec:   null,
+  _currentRecId: null,
+  _syncMode:     true,   // 원곡과 동시 재생 여부
+  _syncOffsetMs: 0,      // 싱크 보정 (ms)
 
   /* ── 모달 열기 ── */
   async open() {
@@ -155,36 +156,38 @@ const RecordingsUI = {
     });
   },
 
-  /* ── 재생 ── */
+  /* ── 재생 (단순화: 모든 녹음에 곡 정보 존재) ── */
   async _play(id) {
     const rec = await RecorderDB.get(id);
     if (!rec) return;
 
     this._stopPlayback();
 
-    // 녹음 오디오 엘리먼트 준비
     const url     = URL.createObjectURL(rec.blob);
     const audioEl = this._modal.querySelector(`audio[data-id="${id}"]`);
     if (!audioEl) return;
 
     audioEl.src = url;
     audioEl.classList.remove('hidden');
-    this._audioEl    = audioEl;
-    this._currentRec = rec;
+    this._audioEl     = audioEl;
+    this._currentRec  = rec;
+    this._currentRecId = id;
+    this._setPlayingUI(id, true);
 
-    // 싱크 조건 판정: syncMode ON + 곡 정보 있음 + trackSig 일치
-    const canSync = this._syncMode
-      && rec.hasSong
-      && window.mixer
-      && window.currentService
+    // 싱크 가능 여부 판정
+    const hasMixerLoaded = !!(window.mixer?.tracks?.length);
+    const sameSong       = hasMixerLoaded
       && rec.trackSig
       && rec.trackSig === this._getCurrentTrackSig();
+    const willSync = this._syncMode && sameSong;
 
-    if (canSync) {
+    if (willSync) {
       await this._playSynced(rec, audioEl);
     } else {
-      if (this._syncMode && rec.hasSong) {
-        UI?.toast?.('ℹ️ 해당 곡이 로드되지 않아 녹음만 재생합니다');
+      if (this._syncMode && !hasMixerLoaded) {
+        UI?.toast?.(`ℹ️ 함께 재생하려면 "${rec.songTitle}"을 먼저 로드하세요`);
+      } else if (this._syncMode && !sameSong) {
+        UI?.toast?.(`ℹ️ 녹음 당시 곡(${rec.songTitle})을 로드하면 싱크 재생됩니다`);
       }
       audioEl.currentTime = 0;
       await audioEl.play().catch(e => console.warn('[RecordingsUI] 재생 실패:', e));
@@ -192,13 +195,22 @@ const RecordingsUI = {
 
     audioEl.onended = () => {
       URL.revokeObjectURL(url);
-      if (canSync && window.mixer) {
+      if (willSync && window.mixer) {
         try {
           window.mixer.pause();
           if (window.UI?.setTransportState) UI.setTransportState('paused');
         } catch {}
       }
+      this._setPlayingUI(id, false);
     };
+  },
+
+  /* ── 재생 중 버튼 UI ── */
+  _setPlayingUI(id, isPlaying) {
+    const btn = this._modal?.querySelector(`[data-action="play"][data-id="${id}"]`);
+    if (!btn) return;
+    btn.textContent = isPlaying ? '⏹ 정지' : '▶ 재생';
+    btn.classList.toggle('rec-btn-playing', isPlaying);
   },
 
   /* ── 원곡 동기 재생 (선예약 동시 시작) ── */

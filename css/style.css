@@ -740,3 +740,29 @@ body {
   .rec-sync-offset { display: none; } /* 모바일에선 슬라이더 숨김 */
   .headphone-warning-box { padding: 24px 20px; }
 }
+
+/* ════════════════════════════════════════
+   레코딩연습 v3 — REC 비활성화 + 재생중 버튼
+════════════════════════════════════════ */
+
+/* ── REC 버튼 비활성화 상태 ── */
+.tr-rec.disabled,
+.tr-rec:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  color: #666 !important;
+  border-color: #444 !important;
+  background: transparent !important;
+  animation: none !important;
+}
+.tr-rec.disabled:hover,
+.tr-rec:disabled:hover {
+  background: transparent !important;
+  color: #666 !important;
+}
+
+/* ── 재생 중 버튼 상태 ── */
+.rec-btn-playing {
+  background: #3d1a1a !important;
+  color: #e06060 !important;
+}

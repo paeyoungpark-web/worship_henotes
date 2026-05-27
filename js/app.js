@@ -101,6 +101,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindGlobalEvents();
   bindKeyboard();
   UI.setTransportState('ready');
+
+  // 🔴 REC 버튼 상태 자동 관리
+  if (window.Recorder) {
+    Recorder.startStateWatcher();
+  }
 });
 
 /* ══════════════ 홈 렌더링 ══════════════ */
@@ -435,13 +440,23 @@ function bindGlobalEvents() {
     if (mixer.ctx?.state === 'suspended') await mixer.ctx.resume();
     mixer.play(mixer.pauseTime);
     UI.setTransportState('playing');
+    Recorder?.syncButtonState();
+    // 첫 재생 시 REC 힌트 (세션당 1회)
+    if (!sessionStorage.getItem('rec_hint_shown')) {
+      setTimeout(() => {
+        UI.toast('💡 🔴 REC 버튼으로 지금 위치부터 더빙 녹음할 수 있습니다');
+        sessionStorage.setItem('rec_hint_shown', '1');
+      }, 1500);
+    }
   });
   document.getElementById('pause-btn').addEventListener('click', () => {
     mixer.pause(); UI.setTransportState('paused'); updateTimeDisplay();
+    Recorder?.syncButtonState();
   });
   document.getElementById('stop-btn').addEventListener('click', () => {
     mixer.stop(); UI.setTransportState('ready');
     document.getElementById('seek-bar').value = 0; updateTimeDisplay();
+    Recorder?.syncButtonState();
   });
   document.getElementById('seek-bar').addEventListener('input', e => {
     if (!mixer.songDuration) return;

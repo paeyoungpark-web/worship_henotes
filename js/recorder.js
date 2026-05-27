@@ -95,6 +95,34 @@ const Recorder = {
     startWallTime: 0,
     songSnapshot:  null,
     ledTimer:      null,
+    stateWatcher:  null,
+  },
+
+  /* ── REC 버튼 활성화 상태 동기화 ── */
+  syncButtonState() {
+    const btn = document.getElementById('rec-btn');
+    if (!btn) return;
+    if (this._state.isRecording) {
+      btn.disabled = false;
+      btn.classList.remove('disabled');
+      btn.title = '녹음 정지 (R)';
+      return;
+    }
+    const canRecord = !!(window.mixer?.isPlaying);
+    btn.disabled = !canRecord;
+    btn.classList.toggle('disabled', !canRecord);
+    btn.title = canRecord ? '녹음 시작 (R)' : '⚠️ 곡을 먼저 재생하세요';
+  },
+
+  startStateWatcher() {
+    if (this._state.stateWatcher) return;
+    this._state.stateWatcher = setInterval(() => this.syncButtonState(), 300);
+    this.syncButtonState();
+  },
+
+  stopStateWatcher() {
+    clearInterval(this._state.stateWatcher);
+    this._state.stateWatcher = null;
   },
 
   /* ── REC 버튼 토글 ── */
@@ -106,6 +134,12 @@ const Recorder = {
   /* ── 녹음 시작 — 곡 선택 여부와 무관하게 즉시 동작 ── */
   async start() {
     if (this._state.isRecording) return;
+
+    // 안전장치: 곡이 재생 중이 아니면 차단
+    if (!window.mixer?.isPlaying) {
+      this._toast('⚠️ 곡을 먼저 재생한 후 녹음하세요');
+      return;
+    }
 
     // 🎧 헤드셋 착용 경고 (항상 표시)
     this._showHeadphoneWarning();
@@ -136,23 +170,17 @@ const Recorder = {
       };
       mr.onstop = () => this._onStop(mr.mimeType || mimeType);
 
-      // ── 곡이 로드된 경우 타임라인 + 트랙 시그니처 캡처 ──
-      const hasMixer = !!(window.mixer?.tracks?.length);
-      const offset   = hasMixer
-        ? (window.mixer.isPlaying
-            ? window.mixer.getCurrentTime()
-            : (window.mixer.pauseTime ?? 0))
-        : 0;
+      // ── 곡이 반드시 재생 중이므로 실시간 현재 위치 캡처 ──
+      const offset = window.mixer.getCurrentTime();
 
       this._state.songSnapshot = {
-        hasSong:     hasMixer && !!window.currentService,
-        serviceId:   window.currentService?.id  ?? null,
-        teamIdx:     window.currentTeamIdx      ?? null,
-        songIdx:     window.currentSongIdx      ?? null,
-        songTitle:   window.currentSongData?.title ?? window.currentSongTitle ?? '(곡 미선택)',
-        channelIdx:  window.myPartIdx           ?? -1,
-        channelName: hasMixer ? this._getChannelName() : '(독립 녹음)',
-        trackSig:    hasMixer ? this._getTrackSig() : null,
+        serviceId:   window.currentService?.id   ?? null,
+        teamIdx:     window.currentTeamIdx       ?? 0,
+        songIdx:     window.currentSongIdx       ?? 0,
+        songTitle:   window.currentSongData?.title ?? window.currentSongTitle ?? '제목 없음',
+        channelIdx:  window.myPartIdx            ?? -1,
+        channelName: this._getChannelName(),
+        trackSig:    this._getTrackSig(),
       };
 
       this._state.startOffset   = offset;
@@ -161,13 +189,11 @@ const Recorder = {
       this._state.mediaRecorder = mr;
       this._state.isRecording   = true;
 
-      mr.start(1000);  // 1초 단위 청크
+      mr.start(1000);
       this._setRecUI(true);
+      this.syncButtonState();
 
-      const label = hasMixer
-        ? `🔴 녹음 시작 — ${this._state.songSnapshot.songTitle} (${this._fmtTime(offset)})`
-        : '🔴 녹음 시작 — 독립 모드';
-      this._toast(label);
+      this._toast(`🔴 녹음 시작 — ${this._state.songSnapshot.songTitle} (${this._fmtTime(offset)})`);
 
     } catch (err) {
       console.error('[Recorder] 시작 실패:', err);
@@ -236,7 +262,6 @@ const Recorder = {
     const record = {
       id:          'rec_' + Date.now(),
       timestamp:   Date.now(),
-      hasSong:     snap.hasSong,
       serviceId:   snap.serviceId,
       teamIdx:     snap.teamIdx,
       songIdx:     snap.songIdx,
@@ -266,6 +291,7 @@ const Recorder = {
     this._state.stream        = null;
     this._state.chunks        = [];
     this._setRecUI(false);
+    this.syncButtonState();
   },
 
   /* ── 코덱 자동 선택 ── */
