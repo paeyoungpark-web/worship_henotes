@@ -175,6 +175,7 @@
           <div id="song-title" class="song-title-display">—</div>
           <div id="song-date"  class="song-date-display">—</div>
         </div>
+        <button id="my-recordings-btn" class="my-rec-btn" title="내 녹음 목록">🎙 내 녹음</button>
         <div class="my-part-box">
           <label>MY CH 1</label>
           <select id="my-part-select"></select>
@@ -188,6 +189,8 @@
         <button id="play-btn"  class="tr-btn tr-play"><span class="tr-icon">▶</span><span class="tr-label">PLAY</span></button>
         <button id="pause-btn" class="tr-btn tr-pause" disabled><span class="tr-icon">❚❚</span><span class="tr-label">PAUSE</span></button>
         <button id="stop-btn"  class="tr-btn tr-stop"  disabled><span class="tr-icon">■</span><span class="tr-label">STOP</span></button>
+        <button id="rec-btn" class="tr-btn tr-rec" title="녹음 시작/정지 (R)"><span class="tr-icon">🔴</span><span class="tr-label">REC</span></button>
+        <span id="rec-led" class="rec-led hidden">●</span>
         <div class="time-display">
           <span id="time-current">0:00.0</span>
           <span class="time-sep">/</span>
@@ -300,6 +303,8 @@
   <script src="js/mixer.js"></script>
   <script src="js/visualizer.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/recorder.js"></script>
+  <script src="js/recordings-ui.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

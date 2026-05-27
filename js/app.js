@@ -289,6 +289,11 @@ function getTrackSignature(tracks) {
 }
 
 async function openSong(serviceId, teamIdx, songIdx, fromPlaylist = false) {
+  // 녹음 중 곡 전환 시 자동 정지
+  if (window.Recorder?.isRecording ?? Recorder?._state?.isRecording) {
+    await Recorder.stop();
+    UI.toast('🛑 곡 전환으로 녹음 정지됨');
+  }
   const s    = allServices.find(x => x.id === serviceId);
   const song = s?.teams?.[teamIdx]?.songs?.[songIdx];
   if (!song || !song.tracks?.length) return;
@@ -523,6 +528,12 @@ function bindGlobalEvents() {
     navigator.clipboard?.writeText(msg).then(() => UI.toast('💬 피드백 양식 복사됨 — 단톡방에 붙여넣으세요'));
   });
 
+  // 🔴 REC 버튼 (녹음 시작/정지)
+  document.getElementById('rec-btn')?.addEventListener('click', () => Recorder.toggle());
+
+  // 🎙 내 녹음 목록 모달
+  document.getElementById('my-recordings-btn')?.addEventListener('click', () => RecordingsUI.open());
+
   // 도움말
   document.getElementById('info-btn').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
   document.getElementById('help-close').addEventListener('click', () => document.getElementById('help-modal').classList.add('hidden'));
@@ -562,6 +573,11 @@ function bindKeyboard() {
         });
         UI.toast(`🔉 MY CH -1dB → ${UI.dbToLabel(mixer.tracks[idxs[0]].volumeDb)} dB`);
         e.preventDefault(); break;
+      }
+      case 'r':
+      case 'R': {
+        if (!e.ctrlKey && !e.metaKey) { e.preventDefault(); Recorder.toggle(); }
+        break;
       }
       case ' ': {
         if (!mixer.tracks.length) break;

@@ -500,3 +500,146 @@ body {
   .pager-dot { min-width: 60px; padding: 5px 8px; }
   .pager-dot .dot-title { max-width: 80px; }
 }
+
+/* ════════════════════════════════════════
+   레코딩연습 브랜치 — REC + 녹음 목록 스타일
+════════════════════════════════════════ */
+
+/* ── REC 버튼 ── */
+.tr-rec { border-color:#c8421e; color:#ff6b4a; }
+.tr-rec:hover:not(:disabled) { background:#c8421e; color:#fff; }
+.tr-rec.recording {
+  background:#c8421e; color:#fff; border-color:#ff8c5a;
+  animation: rec-pulse 1s infinite;
+}
+@keyframes rec-pulse {
+  0%,100% { box-shadow: 0 0 0 0   rgba(200,66,30,.7); }
+  50%      { box-shadow: 0 0 0 10px rgba(200,66,30,0); }
+}
+
+/* ── REC LED 점멸 ── */
+.rec-led {
+  color:#ff3030; font-size:1.3rem; margin-left:4px;
+  text-shadow: 0 0 8px #ff3030;
+  transition: opacity .15s;
+  line-height: 1;
+  align-self: center;
+}
+
+/* ── 내 녹음 버튼 ── */
+.my-rec-btn {
+  background: rgba(240,168,48,0.1);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: .15s;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.my-rec-btn:hover { background: var(--accent); color: #000; }
+
+/* ── 녹음 목록 모달 ── */
+.rec-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.88);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+.rec-modal.hidden { display: none; }
+
+.rec-modal-box {
+  background: #1a1a1a;
+  border: 1px solid #383838;
+  border-radius: 12px;
+  width: 92%; max-width: 720px;
+  max-height: 85vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.7);
+}
+
+.rec-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid #333;
+  background: linear-gradient(90deg, rgba(240,168,48,.12), transparent);
+}
+.rec-modal-header h3 { margin:0; color: var(--accent); font-size: 1rem; letter-spacing: 1px; }
+
+.rec-modal-actions { display: flex; align-items: center; gap: 14px; }
+.rec-sync-toggle {
+  color: #bbb; font-size: .82rem; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 6px;
+}
+.rec-close-btn {
+  background: none; border: none; color: #888;
+  font-size: 1.3rem; cursor: pointer; padding: 4px 8px; line-height: 1;
+}
+.rec-close-btn:hover { color: #fff; }
+
+.rec-storage-info {
+  padding: 8px 22px;
+  background: #111;
+  color: #666;
+  font-size: .78rem;
+  border-bottom: 1px solid #2a2a2a;
+  font-family: monospace;
+}
+
+.rec-list { overflow-y: auto; padding: 14px 20px; flex: 1; }
+.rec-empty {
+  text-align: center; color: #555;
+  padding: 48px 20px; line-height: 1.8; font-size: .88rem;
+}
+.rec-empty strong { color: var(--accent); }
+
+.rec-item {
+  background: #222;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  padding: 13px 15px;
+  margin-bottom: 9px;
+  transition: border-color .15s;
+}
+.rec-item:hover { border-color: #444; }
+
+.rec-item-title {
+  color: #eee; font-weight: 600; font-size: .9rem;
+  margin-bottom: 5px;
+}
+.rec-item-meta {
+  color: #777; font-size: .76rem;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-family: monospace;
+  margin-bottom: 10px;
+}
+
+.rec-item-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.rec-item-actions button {
+  background: #333; color: #ccc; border: none;
+  padding: 6px 11px; border-radius: 5px;
+  cursor: pointer; font-size: .78rem; transition: .1s;
+}
+.rec-btn-play  { background: #1e4d32 !important; color: #5cd991 !important; }
+.rec-btn-play:hover  { background: #2d6b44 !important; }
+.rec-btn-dl:hover    { background: #444 !important; }
+.rec-btn-del   { background: #3d1a1a !important; color: #e06060 !important; }
+.rec-btn-del:hover   { background: #5a2020 !important; }
+
+.rec-item-audio {
+  width: 100%; margin-top: 10px;
+  border-radius: 4px;
+}
+
+/* 모바일 */
+@media (max-width: 600px) {
+  .rec-modal-actions { flex-direction: column; gap: 8px; align-items: flex-end; }
+  .rec-item-meta { font-size: .7rem; gap: 8px; }
+  .my-rec-btn { font-size: 0.68rem; padding: 5px 9px; }
+}
