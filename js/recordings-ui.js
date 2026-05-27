@@ -13,6 +13,7 @@ const RecordingsUI = {
   _currentRecId: null,
   _syncMode:     true,   // 원곡과 동시 재생 여부
   _syncOffsetMs: 0,      // 싱크 보정 (ms)
+  _forceSync:   false,   // 강제 싱크 (시그니처 무시)
 
   /* ── 모달 열기 ── */
   async open() {
@@ -46,6 +47,10 @@ const RecordingsUI = {
                 <input type="range" id="rec-sync-offset" min="-500" max="500" step="10" value="0">
                 <span id="rec-sync-offset-val">0ms</span>
               </label>
+              <label class="rec-sync-toggle" title="시그니처 검사 무시 — 현재 로드된 곡과 강제 싱크">
+                <input type="checkbox" id="rec-force-sync">
+                <span>강제 싱크</span>
+              </label>
               <button class="rec-close-btn" id="rec-close-btn">✕</button>
             </div>
           </div>
@@ -68,6 +73,9 @@ const RecordingsUI = {
     // 원곡 동시 재생 토글
     document.getElementById('rec-sync-cb')
       .addEventListener('change', e => { this._syncMode = e.target.checked; });
+
+    document.getElementById('rec-force-sync')
+      ?.addEventListener('change', e => { this._forceSync = e.target.checked; });
 
     // 싱크 보정 슬라이더
     const slider  = document.getElementById('rec-sync-offset');
@@ -173,33 +181,44 @@ const RecordingsUI = {
     this._currentRecId = id;
     this._setPlayingUI(id, true);
 
-    // 진단 로그
-    const curSig = this._getCurrentTrackSig();
-    console.log('[RecordingsUI] 재생 진단:', {
-      syncMode:    this._syncMode,
-      recTrackSig: rec.trackSig,
-      curTrackSig: curSig,
-      sigMatch:    rec.trackSig === curSig,
-      startOffset: rec.startOffset,
-      hasMixSnap:  !!rec.mixSnapshot,
-    });
-
     const hasMixerLoaded = !!(typeof mixer !== 'undefined' && mixer?.tracks?.length);
-    const sameSong       = hasMixerLoaded && rec.trackSig && rec.trackSig === curSig;
-    const willSync       = this._syncMode && sameSong;
+
+    // ① songKey 비교 (우선) — 가장 신뢰성 높음
+    const curSongKey   = this._getCurrentSongKey();
+    const sameSongByKey = hasMixerLoaded && rec.songKey && rec.songKey === curSongKey;
+
+    // ② trackSig 비교 (보조) — 같은 파일이 로드됐는지
+    const curSig        = this._getCurrentTrackSig();
+    const sameSongBySig = hasMixerLoaded && rec.trackSig && rec.trackSig === curSig;
+
+    const sameSong = sameSongByKey || sameSongBySig;
+    const willSync = this._syncMode && (sameSong || (this._forceSync && hasMixerLoaded));
+
+    console.log('[RecordingsUI] 재생 진단:', {
+      syncMode:      this._syncMode,
+      forceSync:     this._forceSync,
+      hasMixerLoaded,
+      recSongKey:    rec.songKey,
+      curSongKey,
+      sameSongByKey,
+      sameSongBySig,
+      willSync,
+      startOffset:   rec.startOffset,
+      hasMixSnap:    !!rec.mixSnapshot,
+    });
 
     if (willSync) {
       if (rec.mixSnapshot) {
         this._restoreMixSnapshot(rec.mixSnapshot);
-        UI?.toast?.('🎚 녹음 시점의 믹스로 복원됩니다');
+        UI?.toast?.('🎚 녹음 시점의 믹스 상태 복원됨');
       }
       await this._playSynced(rec, audioEl);
     } else {
-      if (this._syncMode) {
+      if (this._syncMode && !this._forceSync) {
         if (!hasMixerLoaded) {
-          UI?.toast?.(`ℹ️ "${rec.songTitle}"을 먼저 로드하면 싱크 재생됩니다`);
-        } else if (rec.trackSig && rec.trackSig !== curSig) {
-          UI?.toast?.(`ℹ️ 녹음 당시 곡(${rec.songTitle})을 로드하면 싱크 재생됩니다`);
+          UI?.toast?.(`ℹ️ "${rec.songTitle}"을 먼저 로드하면 함께 재생됩니다`);
+        } else {
+          UI?.toast?.(`ℹ️ 같은 곡(${rec.songTitle})을 로드하면 함께 재생됩니다`);
         }
       }
       audioEl.currentTime = 0;
@@ -307,8 +326,18 @@ const RecordingsUI = {
   /* ── 현재 로드된 트랙 시그니처 ── */
   _getCurrentTrackSig() {
     try {
-      const tracks = window.mixer?.tracks || [];
+      const tracks = (typeof mixer !== 'undefined' ? mixer?.tracks : null) || [];
       return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
+    } catch { return null; }
+  },
+
+  /* ── 현재 곡 식별 키 ── */
+  _getCurrentSongKey() {
+    try {
+      const sid = window.currentService?.id || 'unknown';
+      const t   = window.currentTeamIdx ?? 0;
+      const s   = window.currentSongIdx ?? 0;
+      return `${sid}_t${t}_s${s}`;
     } catch { return null; }
   },
 

@@ -178,6 +178,7 @@ const Recorder = {
         channelIdx:  window.myPartIdx            ?? -1,
         channelName: this._getChannelName(),
         trackSig:    this._getTrackSig(),
+        songKey:     this._getSongKey(),           // 곡 식별 고유 키
         mixSnapshot: this._captureMixSnapshot(),  // 녹음 시점 믹스 상태
       };
 
@@ -268,6 +269,7 @@ const Recorder = {
       channelName: snap.channelName,
       channelIdx:  snap.channelIdx,
       trackSig:    snap.trackSig,
+      songKey:     snap.songKey ?? null,
       mixSnapshot: snap.mixSnapshot ?? null,  // 녹음 시점 믹스 상태
       startOffset: this._state.startOffset,
       duration,
@@ -325,6 +327,16 @@ const Recorder = {
       const tracks = (typeof mixer !== 'undefined' ? mixer?.tracks : null) || [];
       if (!tracks.length) return null;
       return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
+    } catch { return null; }
+  },
+
+  /* ── 곡 식별 고유 키 (serviceId + teamIdx + songIdx) ── */
+  _getSongKey() {
+    try {
+      const sid = window.currentService?.id || 'unknown';
+      const t   = window.currentTeamIdx ?? 0;
+      const s   = window.currentSongIdx ?? 0;
+      return `${sid}_t${t}_s${s}`;
     } catch { return null; }
   },
 
