@@ -156,11 +156,10 @@ const RecordingsUI = {
     });
   },
 
-  /* ── 재생 (단순화: 모든 녹음에 곡 정보 존재) ── */
+  /* ── 재생 ── */
   async _play(id) {
     const rec = await RecorderDB.get(id);
     if (!rec) return;
-
     this._stopPlayback();
 
     const url     = URL.createObjectURL(rec.blob);
@@ -169,25 +168,39 @@ const RecordingsUI = {
 
     audioEl.src = url;
     audioEl.classList.remove('hidden');
-    this._audioEl     = audioEl;
-    this._currentRec  = rec;
+    this._audioEl      = audioEl;
+    this._currentRec   = rec;
     this._currentRecId = id;
     this._setPlayingUI(id, true);
 
-    // 싱크 가능 여부 판정
-    const hasMixerLoaded = !!(window.mixer?.tracks?.length);
-    const sameSong       = hasMixerLoaded
-      && rec.trackSig
-      && rec.trackSig === this._getCurrentTrackSig();
-    const willSync = this._syncMode && sameSong;
+    // 진단 로그
+    const curSig = this._getCurrentTrackSig();
+    console.log('[RecordingsUI] 재생 진단:', {
+      syncMode:    this._syncMode,
+      recTrackSig: rec.trackSig,
+      curTrackSig: curSig,
+      sigMatch:    rec.trackSig === curSig,
+      startOffset: rec.startOffset,
+      hasMixSnap:  !!rec.mixSnapshot,
+    });
+
+    const hasMixerLoaded = !!(typeof mixer !== 'undefined' && mixer?.tracks?.length);
+    const sameSong       = hasMixerLoaded && rec.trackSig && rec.trackSig === curSig;
+    const willSync       = this._syncMode && sameSong;
 
     if (willSync) {
+      if (rec.mixSnapshot) {
+        this._restoreMixSnapshot(rec.mixSnapshot);
+        UI?.toast?.('🎚 녹음 시점의 믹스로 복원됩니다');
+      }
       await this._playSynced(rec, audioEl);
     } else {
-      if (this._syncMode && !hasMixerLoaded) {
-        UI?.toast?.(`ℹ️ 함께 재생하려면 "${rec.songTitle}"을 먼저 로드하세요`);
-      } else if (this._syncMode && !sameSong) {
-        UI?.toast?.(`ℹ️ 녹음 당시 곡(${rec.songTitle})을 로드하면 싱크 재생됩니다`);
+      if (this._syncMode) {
+        if (!hasMixerLoaded) {
+          UI?.toast?.(`ℹ️ "${rec.songTitle}"을 먼저 로드하면 싱크 재생됩니다`);
+        } else if (rec.trackSig && rec.trackSig !== curSig) {
+          UI?.toast?.(`ℹ️ 녹음 당시 곡(${rec.songTitle})을 로드하면 싱크 재생됩니다`);
+        }
       }
       audioEl.currentTime = 0;
       await audioEl.play().catch(e => console.warn('[RecordingsUI] 재생 실패:', e));
@@ -195,16 +208,16 @@ const RecordingsUI = {
 
     audioEl.onended = () => {
       URL.revokeObjectURL(url);
-      if (willSync && window.mixer) {
+      if (willSync && typeof mixer !== 'undefined') {
         try {
-          window.mixer.pause();
+          if (typeof mixer.pause === 'function') mixer.pause();
+          else if (typeof mixer.stop === 'function') mixer.stop();
           if (window.UI?.setTransportState) UI.setTransportState('paused');
         } catch {}
       }
       this._setPlayingUI(id, false);
     };
   },
-
   /* ── 재생 중 버튼 UI ── */
   _setPlayingUI(id, isPlaying) {
     const btn = this._modal?.querySelector(`[data-action="play"][data-id="${id}"]`);
@@ -213,55 +226,71 @@ const RecordingsUI = {
     btn.classList.toggle('rec-btn-playing', isPlaying);
   },
 
-  /* ── 원곡 동기 재생 (선예약 동시 시작) ── */
+  /* ── 원곡 동기 재생 (다중 API 패턴 시도) ── */
   async _playSynced(rec, audioEl) {
     try {
-      // 1) 믹서 정지 후 시작 위치로 시드
-      window.mixer.stop();
-      audioEl.currentTime = 0;
-      audioEl.preload     = 'auto';
+      // 1) 믹서 정지
+      if (typeof mixer.stop === 'function')       mixer.stop();
+      else if (typeof mixer.pause === 'function') mixer.pause();
 
-      // 2) 녹음 오디오 재생 준비 완료까지 대기
+      audioEl.currentTime = 0;
+      audioEl.preload = 'auto';
       await this._waitCanPlay(audioEl);
 
-      // 3) 싱크 보정 적용 (offsetSec: 양수 = 녹음을 앞으로, 음수 = 녹음을 뒤로)
-      const offsetSec   = (this._syncOffsetMs || 0) / 1000;
-      const audioDelay  = offsetSec < 0 ? Math.abs(offsetSec) * 1000 : 0;
+      // 2) 싱크 보정
+      const offsetSec  = (this._syncOffsetMs || 0) / 1000;
+      if (offsetSec > 0) audioEl.currentTime = offsetSec;
+      const audioDelay = offsetSec < 0 ? Math.abs(offsetSec) * 1000 : 0;
 
-      if (offsetSec > 0) {
-        audioEl.currentTime = offsetSec; // 녹음을 더 빨리 시작
-      }
+      // 3) 믹서 시작 — 여러 API 패턴 시도
+      const syncOffset = rec.startOffset || 0;
+      const startMixer = () => {
+        // 패턴 A: seek(offset) + play() — 메인 mixer.js 방식
+        if (typeof mixer.seek === 'function' && typeof mixer.play === 'function') {
+          mixer.seek(syncOffset);
+          mixer.play(syncOffset);
+          if (window.UI?.setTransportState) UI.setTransportState('playing');
+          console.log('[RecordingsUI] 믹서 시작: seek+play(offset)');
+          return;
+        }
+        // 패턴 B: play(offset)만
+        if (typeof mixer.play === 'function') {
+          try { mixer.play(syncOffset); if (window.UI?.setTransportState) UI.setTransportState('playing'); console.log('[RecordingsUI] 믹서 시작: play(offset)'); return; } catch {}
+        }
+        // 패턴 C: 기타
+        const setters = ['setCurrentTime','setPosition','seek'];
+        for (const fn of setters) {
+          if (typeof mixer[fn] === 'function') {
+            mixer[fn](syncOffset);
+            mixer.play?.();
+            if (window.UI?.setTransportState) UI.setTransportState('playing');
+            console.log('[RecordingsUI] 믹서 시작:', fn + '+play');
+            return;
+          }
+        }
+        console.warn('[RecordingsUI] 믹서 재생 API 없음. 사용 가능 메서드:', Object.getOwnPropertyNames(Object.getPrototypeOf(mixer)).filter(k => typeof mixer[k]==='function'));
+        UI?.toast?.('⚠️ 원곡 재생 실패 — 콘솔 확인');
+      };
 
-      // 4) 믹서 seek
-      if (typeof window.mixer.seek === 'function') {
-        window.mixer.seek(rec.startOffset);
-      }
-
-      // 5) requestAnimationFrame으로 같은 프레임에 동시 시작
+      // 4) requestAnimationFrame으로 동시 시작
+      const startAudio = () => audioEl.play().catch(e => console.warn('[RecordingsUI] 녹음 재생 실패:', e));
       requestAnimationFrame(() => {
-        const startAudio = () =>
-          audioEl.play().catch(e => console.warn('[RecordingsUI] 녹음 재생 실패:', e));
-
         if (audioDelay > 0) {
-          // 녹음을 지연 시작 (믹서를 먼저 시작)
-          try { window.mixer.play(); if (window.UI?.setTransportState) UI.setTransportState('playing'); } catch {}
+          startMixer();
           setTimeout(startAudio, audioDelay);
         } else {
-          // 동시 시작
           startAudio();
-          try { window.mixer.play(); if (window.UI?.setTransportState) UI.setTransportState('playing'); } catch {}
+          startMixer();
         }
       });
 
-      console.log('[RecordingsUI] 싱크 재생 시작. offset:', rec.startOffset, '보정:', this._syncOffsetMs, 'ms');
-      UI?.toast?.(`🎚 싱크 재생 — 보정 ${(this._syncOffsetMs >= 0 ? '+' : '') + this._syncOffsetMs}ms`, 3000);
+      UI?.toast?.(`🎧 싱크 재생 — ${rec.songTitle} (보정 ${this._syncOffsetMs >= 0 ? '+' : ''}${this._syncOffsetMs}ms)`, 3000);
 
     } catch (e) {
       console.error('[RecordingsUI] 싱크 재생 오류:', e);
       audioEl.play().catch(() => {});
     }
   },
-
   /* ── 녹음 오디오 재생 준비 대기 ── */
   _waitCanPlay(audioEl) {
     return new Promise(resolve => {
@@ -281,6 +310,30 @@ const RecordingsUI = {
       const tracks = window.mixer?.tracks || [];
       return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
     } catch { return null; }
+  },
+
+
+  /* ── 녹음 시점 믹스 상태 복원 ── */
+  _restoreMixSnapshot(snapshot) {
+    if (!snapshot || typeof mixer === 'undefined' || !mixer?.tracks) return;
+    snapshot.forEach(saved => {
+      const t = mixer.tracks[saved.idx];
+      if (!t) return;
+      try {
+        // mute
+        if (typeof mixer.muteTrack === 'function') mixer.muteTrack(saved.idx, saved.muted);
+        else t.muted = saved.muted;
+        // solo
+        if (typeof mixer.soloTrack === 'function') mixer.soloTrack(saved.idx, saved.solo);
+        else t.solo = saved.solo;
+        // volume
+        if (typeof mixer.setTrackVolumeDb === 'function') mixer.setTrackVolumeDb(saved.idx, saved.volumeDb ?? 0);
+        else if (t.gain?.gain) t.gain.gain.value = saved.gain ?? 1.0;
+        // pan
+        if (typeof mixer.setTrackPan === 'function') mixer.setTrackPan(saved.idx, saved.pan ?? 0);
+      } catch (e) { console.warn('[RecordingsUI] 채널', saved.idx, '복원 실패:', e); }
+    });
+    console.log('[RecordingsUI] 믹스 스냅샷 복원 완료');
   },
 
   /* ── 모든 재생 중지 ── */

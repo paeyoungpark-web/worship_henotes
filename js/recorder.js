@@ -178,6 +178,7 @@ const Recorder = {
         channelIdx:  window.myPartIdx            ?? -1,
         channelName: this._getChannelName(),
         trackSig:    this._getTrackSig(),
+        mixSnapshot: this._captureMixSnapshot(),  // 녹음 시점 믹스 상태
       };
 
       this._state.startOffset   = offset;
@@ -188,6 +189,7 @@ const Recorder = {
 
       mr.start(1000);
       this._setRecUI(true);
+      this._setupLevelMeter(stream);  // 입력 레벨 미터 시작
 
       this._toast(`🔴 녹음 시작 (${this._fmtTime(offset)}부터)`);
 
@@ -253,6 +255,7 @@ const Recorder = {
     const duration = (Date.now() - this._state.startWallTime) / 1000;
 
     this._state.stream?.getTracks().forEach(t => t.stop());
+    this._stopLevelMeter();  // 레벨미터 정지
 
     const snap   = this._state.songSnapshot;
     const record = {
@@ -264,7 +267,8 @@ const Recorder = {
       songTitle:   snap.songTitle,
       channelName: snap.channelName,
       channelIdx:  snap.channelIdx,
-      trackSig:    snap.trackSig,    // 원곡 싱크 식별용
+      trackSig:    snap.trackSig,
+      mixSnapshot: snap.mixSnapshot ?? null,  // 녹음 시점 믹스 상태
       startOffset: this._state.startOffset,
       duration,
       mimeType,
@@ -322,6 +326,82 @@ const Recorder = {
       if (!tracks.length) return null;
       return tracks.map(t => t.info?.file || t.info?.name || '').join('|');
     } catch { return null; }
+  },
+
+  /* ── 녹음 시점 믹스 상태 캡처 ── */
+  _captureMixSnapshot() {
+    try {
+      const tracks = (typeof mixer !== 'undefined' ? mixer?.tracks : null) || [];
+      if (!tracks.length) return null;
+      return tracks.map((t, idx) => ({
+        idx,
+        muted:  t.muted  ?? false,
+        solo:   t.solo   ?? false,
+        gain:   (t.gain?.gain?.value != null) ? t.gain.gain.value : 1.0,
+        volumeDb: t.volumeDb ?? 0,
+        pan:    t.panner?.pan?.value ?? 0,
+      }));
+    } catch (e) {
+      console.warn('[Recorder] 믹스 스냅샷 캡처 실패:', e);
+      return null;
+    }
+  },
+
+  /* ── 입력 레벨미터 시작 ── */
+  _setupLevelMeter(stream) {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      this._meterCtx = new Ctx({ latencyHint: 'interactive' });
+      const src = this._meterCtx.createMediaStreamSource(stream);
+      this._meterAnalyser = this._meterCtx.createAnalyser();
+      this._meterAnalyser.fftSize = 512;
+      src.connect(this._meterAnalyser);
+      this._meterData = new Uint8Array(this._meterAnalyser.fftSize);
+
+      const meter = document.getElementById('rec-input-meter');
+      if (meter) meter.classList.remove('hidden');
+
+      this._meterLoop();
+    } catch (e) {
+      console.warn('[Recorder] 레벨미터 초기화 실패:', e);
+    }
+  },
+
+  _meterLoop() {
+    if (!this._state.isRecording || !this._meterAnalyser) return;
+    this._meterAnalyser.getByteTimeDomainData(this._meterData);
+
+    let sum = 0;
+    for (let i = 0; i < this._meterData.length; i++) {
+      const v = (this._meterData[i] - 128) / 128;
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / this._meterData.length);
+    const db  = 20 * Math.log10(rms || 0.00001);
+    const pct = Math.max(0, Math.min(100, (db + 60) / 60 * 100));
+
+    const bar  = document.getElementById('rec-meter-bar');
+    const dbEl = document.getElementById('rec-meter-db');
+    if (bar) {
+      bar.style.width = pct + '%';
+      bar.style.background =
+        db > -3  ? '#ff3030' :
+        db > -12 ? '#f0a830' : '#4ade80';
+    }
+    if (dbEl) dbEl.textContent = db < -59 ? '-∞' : Math.round(db) + 'dB';
+
+    this._meterRAF = requestAnimationFrame(() => this._meterLoop());
+  },
+
+  _stopLevelMeter() {
+    if (this._meterRAF) cancelAnimationFrame(this._meterRAF);
+    this._meterRAF = null;
+    this._meterAnalyser = null;
+    try { this._meterCtx?.close(); } catch {}
+    this._meterCtx = null;
+    const meter = document.getElementById('rec-input-meter');
+    if (meter) meter.classList.add('hidden');
   },
 
   /* ── REC 버튼 + LED UI 업데이트 ── */

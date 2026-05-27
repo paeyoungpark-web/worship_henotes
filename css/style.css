@@ -760,3 +760,39 @@ body {
   background: #3d1a1a !important;
   color: #e06060 !important;
 }
+
+/* ════════════════════════════════════════
+   레코딩연습 v4 — 입력 레벨 미터
+════════════════════════════════════════ */
+.rec-input-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  padding: 4px 8px;
+  background: #0e0e0e;
+  border: 1px solid #333;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+.rec-input-meter.hidden { display: none !important; }
+.rec-meter-bar-wrap {
+  width: 80px; height: 8px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.rec-meter-bar {
+  height: 100%; width: 0%;
+  background: #4ade80;
+  transition: width 0.04s linear, background 0.08s;
+}
+.rec-meter-db {
+  font-family: monospace; font-size: 0.68rem;
+  color: #888; min-width: 32px; text-align: right;
+}
+@media (max-width: 600px) {
+  .rec-meter-bar-wrap { width: 48px; }
+  .rec-meter-db { display: none; }
+}
