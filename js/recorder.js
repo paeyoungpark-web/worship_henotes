@@ -115,9 +115,8 @@ const Recorder = {
   },
 
   startStateWatcher() {
-    if (this._state.stateWatcher) return;
-    this._state.stateWatcher = setInterval(() => this.syncButtonState(), 300);
-    this.syncButtonState();
+    // 폴링 방식 제거 — 버튼 항상 활성화, start() 클릭 시점에 가드
+    // (window.mixer가 지역변수라 window.mixer.isPlaying 참조 불가)
   },
 
   stopStateWatcher() {
@@ -135,9 +134,9 @@ const Recorder = {
   async start() {
     if (this._state.isRecording) return;
 
-    // 안전장치: 곡이 재생 중이 아니면 차단
-    if (!window.mixer?.isPlaying) {
-      this._toast('⚠️ 곡을 먼저 재생한 후 녹음하세요');
+    // 안전장치: mixer 자체가 없거나 트랙이 없으면 차단
+    if (!window.mixer && !window.currentSongData) {
+      this._toast('⚠️ 곡을 먼저 선택하고 재생하세요');
       return;
     }
 
@@ -191,7 +190,6 @@ const Recorder = {
 
       mr.start(1000);
       this._setRecUI(true);
-      this.syncButtonState();
 
       this._toast(`🔴 녹음 시작 — ${this._state.songSnapshot.songTitle} (${this._fmtTime(offset)})`);
 
@@ -291,7 +289,6 @@ const Recorder = {
     this._state.stream        = null;
     this._state.chunks        = [];
     this._setRecUI(false);
-    this.syncButtonState();
   },
 
   /* ── 코덱 자동 선택 ── */
